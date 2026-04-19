@@ -1,0 +1,43 @@
+#cat-gatekeeper-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cat-gatekeeper-overlay video {
+  height: 100vh;
+  width: auto;
+  animation: slide-in 3s forwards;
+}
+
+#cat-gatekeeper-overlay video.sleeping {
+  animation: none;
+  transform: translateX(0);
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(0); }
+}
+
+#cat-gatekeeper-countdown {
+  position: absolute;
+  top: 20vh;
+  left: 35%;
+  transform: translateX(-50%);
+  font-size: 160px;
+  font-weight: bold;
+  color: white;
+  font-family: sans-serif;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 60px 60px;
+  line-height: 1;
+}

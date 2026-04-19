@@ -1,0 +1,9 @@
+{
+  "appName": { "message": "Cat Gatekeeper" },
+  "appDescription": { "message": "使用社交媒体过长时间后，猫咪会出现" },
+  "usageLimitLabel": { "message": "几分钟后猫咪出现？" },
+  "breakTimeLabel": { "message": "休息时间（分钟）" },
+  "targetSNSLabel": { "message": "目标网站" },
+  "saveButton": { "message": "保存" },
+  "dismissButton": { "message": "让开吧，猫咪！" }
+}

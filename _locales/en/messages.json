@@ -1,0 +1,26 @@
+{
+  "appName": {
+    "message": "Cat Gatekeeper"
+  },
+  "appDescription": {
+    "message": "A cat appears when you use SNS too long"
+  },
+  "usageLimitLabel": {
+    "message": "Minutes before the cat appears"
+  },
+  "breakTimeLabel": {
+    "message": "Break time (minutes)"
+  },
+  "targetSNSLabel": {
+    "message": "Target sites"
+  },
+  "saveButton": {
+    "message": "Save"
+  },
+  "savedMessage": {
+    "message": "Saved!"
+  },
+  "dismissButton": {
+    "message": "Shoo, kitty!"
+  }
+}

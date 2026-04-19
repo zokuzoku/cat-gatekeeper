@@ -1,0 +1,9 @@
+{
+  "appName": { "message": "Cat Gatekeeper" },
+  "appDescription": { "message": "SNS를 너무 오래 사용하면 고양이가 나타납니다" },
+  "usageLimitLabel": { "message": "몇 분 후에 고양이가 나타날까요?" },
+  "breakTimeLabel": { "message": "휴식 시간 (분)" },
+  "targetSNSLabel": { "message": "대상 사이트" },
+  "saveButton": { "message": "저장" },
+  "dismissButton": { "message": "비켜줘, 고양이!" }
+}

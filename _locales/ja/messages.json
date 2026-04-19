@@ -1,0 +1,26 @@
+{
+  "appName": {
+    "message": "Cat Gatekeeper"
+  },
+  "appDescription": {
+    "message": "使いすぎると猫が現れる"
+  },
+  "usageLimitLabel": {
+    "message": "SNSを何分使ったら猫を出す？"
+  },
+  "breakTimeLabel": {
+    "message": "猫が居座る時間（分）"
+  },
+  "targetSNSLabel": {
+    "message": "対象のSNS"
+  },
+  "saveButton": {
+    "message": "保存"
+  },
+  "savedMessage": {
+    "message": "保存しました！"
+  },
+  "dismissButton": {
+    "message": "退いてもらう"
+  }
+}
