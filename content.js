@@ -1,6 +1,19 @@
 const CAT_VIDEO_URL = chrome.runtime.getURL('assets/neko1.webm');
 const CAT_SLEEP_URL = chrome.runtime.getURL('assets/neko2.webm');
 
+// 事前読み込み
+const preloadVideo = document.createElement('video');
+preloadVideo.src = CAT_VIDEO_URL;
+preloadVideo.preload = 'auto';
+preloadVideo.muted = true;
+
+const preloadSleep = document.createElement('video');
+preloadSleep.src = CAT_SLEEP_URL;
+preloadSleep.preload = 'auto';
+preloadSleep.muted = true;
+
+const preventScroll = (e) => e.preventDefault();
+
 const SITE_MAP = {
   'twitter.com': 'x',
   'x.com': 'x',
@@ -32,10 +45,9 @@ chrome.runtime.onMessage.addListener((message) => {
     overlay.style.opacity = '0';
     setTimeout(() => {
       overlay.remove();
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, parseInt(document.body.dataset.scrollY || 0));
+      document.documentElement.style.overflow = '';
+      document.removeEventListener('wheel', preventScroll);
+      document.removeEventListener('touchmove', preventScroll);
     }, 500);
   }
 });
@@ -85,10 +97,9 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       overlay.style.opacity = '0';
       setTimeout(() => {
         overlay.remove();
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, scrollY);
+        document.documentElement.style.overflow = '';
+        document.removeEventListener('wheel', preventScroll);
+        document.removeEventListener('touchmove', preventScroll);
         onBreakEnd();
       }, 1000);
     }
@@ -114,11 +125,9 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   overlay.appendChild(video);
   overlay.appendChild(videoSleep);
   document.body.appendChild(overlay);
-  const scrollY = window.scrollY;
-  document.body.dataset.scrollY = scrollY;
-  document.body.style.position = 'fixed';
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = '100%';
+  document.documentElement.style.overflow = 'hidden';
+  document.addEventListener('wheel', preventScroll, { passive: false });
+  document.addEventListener('touchmove', preventScroll, { passive: false });
 
   // ページ上の動画を一時停止（猫の動画は除く）
   document.querySelectorAll('video').forEach(v => {
