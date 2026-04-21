@@ -6,13 +6,16 @@
   "default_locale": "en",
   "permissions": ["storage"],
   "icons": {
-    "16": "assets/nekoicon.png"
+    "16": "assets/nekoicon16.png",
+    "48": "assets/nekoicon48.png",
+    "128": "assets/nekoicon128.png"
   },
   "action": {
     "default_popup": "popup.html",
     "default_title": "__MSG_appName__",
     "default_icon": {
-      "16": "assets/nekoicon.png"
+      "16": "assets/nekoicon16.png",
+      "48": "assets/nekoicon48.png"
     }
   },
   "content_scripts": [
