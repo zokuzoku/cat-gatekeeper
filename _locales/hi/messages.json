@@ -5,5 +5,6 @@
   "breakTimeLabel": { "message": "ब्रेक का समय (मिनट)" },
   "targetSNSLabel": { "message": "लक्षित साइटें" },
   "saveButton": { "message": "सहेजें" },
+  "savedMessage": { "message": "सहेजा गया!" },
   "dismissButton": { "message": "हट जाओ, बिल्ली!" }
 }

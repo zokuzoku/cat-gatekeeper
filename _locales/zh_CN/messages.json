@@ -5,5 +5,6 @@
   "breakTimeLabel": { "message": "休息时间（分钟）" },
   "targetSNSLabel": { "message": "目标网站" },
   "saveButton": { "message": "保存" },
+  "savedMessage": { "message": "已保存！" },
   "dismissButton": { "message": "让开吧，猫咪！" }
 }

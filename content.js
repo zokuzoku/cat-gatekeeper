@@ -36,11 +36,34 @@ if (siteKey) {
   });
 }
 
-// ポップアップからの閉じる指示を受け取る
-chrome.runtime.onMessage.addListener((message) => {
+let catIsActive = false;
+
+// ポップアップからのメッセージを受け取る
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === 'GET_CAT_STATUS') {
+    sendResponse({ catIsActive });
+    return;
+  }
+
+  if (message.type === 'UPDATE_SETTINGS' && siteKey) {
+    const { settings } = message;
+    currentUsageLimit = settings.usageLimit;
+    currentBreakTime = settings.breakTime;
+    currentSnsEnabled = !!settings.sns[siteKey];
+    if (!currentSnsEnabled) {
+      stopTracker();
+      return;
+    }
+    if (!catIsActive) {
+      startTracking(settings.usageLimit, settings.breakTime);
+    }
+  }
+
   if (message.type === 'DISMISS_CAT') {
     const overlay = document.getElementById('cat-gatekeeper-overlay');
     if (!overlay) return;
+    catIsActive = false;
+    stopCountdown();
     overlay.style.transition = 'opacity 0.5s';
     overlay.style.opacity = '0';
     setTimeout(() => {
@@ -48,13 +71,30 @@ chrome.runtime.onMessage.addListener((message) => {
       document.documentElement.style.overflow = '';
       document.removeEventListener('wheel', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
+      if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
     }, 500);
   }
 });
 
+let resetSeconds = () => {};
+let stopTracker = () => {};
+let stopCountdown = () => {};
+let currentUsageLimit = 60;
+let currentBreakTime = 5;
+let currentSnsEnabled = true;
+
+// タブを切り替えたらリセット（一度だけ登録）
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) resetSeconds();
+});
+
 function startTracking(usageLimit, breakTime) {
+  stopTracker();
+  currentUsageLimit = usageLimit;
+  currentBreakTime = breakTime;
   let localSeconds = 0;
-  chrome.storage.local.set({ catActive: false });
+
+  resetSeconds = () => { localSeconds = 0; };
 
   const tracker = setInterval(() => {
     if (document.hidden || !document.hasFocus()) return;
@@ -62,17 +102,14 @@ function startTracking(usageLimit, breakTime) {
 
     if (localSeconds >= usageLimit * 60) {
       clearInterval(tracker);
-      chrome.storage.local.set({ catActive: true });
-      showCat(breakTime, usageLimit, () => startTracking(usageLimit, breakTime));
+      catIsActive = true;
+      showCat(breakTime, usageLimit, () => {
+        if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
+      });
     }
   }, 1000);
 
-  // 別のタブ・アプリに切り替えたらリセット
-  const resetOnBlur = () => { localSeconds = 0; };
-  window.addEventListener('blur', resetOnBlur);
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) localSeconds = 0;
-  });
+  stopTracker = () => clearInterval(tracker);
 }
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
@@ -84,7 +121,11 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   countdown.id = 'cat-gatekeeper-countdown';
   let seconds = breakMinutes * 60;
 
+  let countdownCancelled = false;
+  stopCountdown = () => { countdownCancelled = true; };
+
   function updateCountdown() {
+    if (countdownCancelled) return;
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     countdown.textContent = `${m}:${String(s).padStart(2, '0')}`;
@@ -92,7 +133,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       seconds--;
       setTimeout(updateCountdown, 1000);
     } else {
-      chrome.storage.local.set({ catActive: false });
+      catIsActive = false;
       overlay.style.transition = 'opacity 1s';
       overlay.style.opacity = '0';
       setTimeout(() => {
