@@ -41,8 +41,8 @@
     }
 
     .sns-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
@@ -111,9 +111,11 @@
     <label data-i18n="targetSNSLabel"></label>
     <div class="sns-list">
       <label class="sns-item"><input type="checkbox" id="sns-x" checked> X (Twitter)</label>
-      <label class="sns-item"><input type="checkbox" id="sns-instagram" checked> Instagram</label>
-      <label class="sns-item"><input type="checkbox" id="sns-tiktok" checked> TikTok</label>
       <label class="sns-item"><input type="checkbox" id="sns-youtube" checked> YouTube</label>
+      <label class="sns-item"><input type="checkbox" id="sns-facebook" checked> Facebook</label>
+      <label class="sns-item"><input type="checkbox" id="sns-reddit" checked> Reddit</label>
+      <label class="sns-item"><input type="checkbox" id="sns-threads" checked> Threads</label>
+      <label class="sns-item"><input type="checkbox" id="sns-bluesky" checked> Bluesky</label>
     </div>
   </div>
 

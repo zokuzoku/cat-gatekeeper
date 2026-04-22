@@ -17,9 +17,11 @@ const preventScroll = (e) => e.preventDefault();
 const SITE_MAP = {
   'twitter.com': 'x',
   'x.com': 'x',
-  'instagram.com': 'instagram',
-  'tiktok.com': 'tiktok',
+  'facebook.com': 'facebook',
+  'reddit.com': 'reddit',
   'youtube.com': 'youtube',
+  'threads.net': 'threads',
+  'bsky.app': 'bluesky',
 };
 
 const hostname = location.hostname;
@@ -27,7 +29,7 @@ const siteKey = Object.entries(SITE_MAP).find(([d]) => hostname.includes(d))?.[1
 
 if (siteKey) {
   chrome.storage.local.get({
-    sns: { x: true, instagram: true, tiktok: true, youtube: true },
+    sns: { x: true, facebook: true, reddit: true, youtube: true, threads: true, bluesky: true },
     usageLimit: 60,
     breakTime: 5,
   }, (settings) => {

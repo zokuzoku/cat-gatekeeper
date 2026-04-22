@@ -23,9 +23,11 @@
       "matches": [
         "*://*.twitter.com/*",
         "*://*.x.com/*",
-        "*://*.instagram.com/*",
-        "*://*.tiktok.com/*",
-        "*://*.youtube.com/*"
+        "*://*.facebook.com/*",
+        "*://*.reddit.com/*",
+        "*://*.youtube.com/*",
+        "*://*.threads.net/*",
+        "*://*.bsky.app/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"]
@@ -37,9 +39,11 @@
       "matches": [
         "*://*.twitter.com/*",
         "*://*.x.com/*",
-        "*://*.instagram.com/*",
-        "*://*.tiktok.com/*",
-        "*://*.youtube.com/*"
+        "*://*.facebook.com/*",
+        "*://*.reddit.com/*",
+        "*://*.youtube.com/*",
+        "*://*.threads.net/*",
+        "*://*.bsky.app/*"
       ]
     }
   ]

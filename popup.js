@@ -39,9 +39,11 @@ const defaults = {
   breakTime: 5,
   sns: {
     x: true,
-    instagram: true,
-    tiktok: true,
+    facebook: true,
+    reddit: true,
     youtube: true,
+    threads: true,
+    bluesky: true,
   }
 };
 
@@ -50,9 +52,11 @@ chrome.storage.local.get(defaults, (settings) => {
   document.getElementById('usageLimit').value = settings.usageLimit;
   document.getElementById('breakTime').value = settings.breakTime;
   document.getElementById('sns-x').checked = settings.sns.x;
-  document.getElementById('sns-instagram').checked = settings.sns.instagram;
-  document.getElementById('sns-tiktok').checked = settings.sns.tiktok;
   document.getElementById('sns-youtube').checked = settings.sns.youtube;
+  document.getElementById('sns-facebook').checked = settings.sns.facebook;
+  document.getElementById('sns-reddit').checked = settings.sns.reddit;
+  document.getElementById('sns-threads').checked = settings.sns.threads;
+  document.getElementById('sns-bluesky').checked = settings.sns.bluesky;
 });
 
 // 設定を保存する
@@ -62,9 +66,11 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     breakTime: getClampedNumberValue('breakTime', defaults.breakTime),
     sns: {
       x: document.getElementById('sns-x').checked,
-      instagram: document.getElementById('sns-instagram').checked,
-      tiktok: document.getElementById('sns-tiktok').checked,
       youtube: document.getElementById('sns-youtube').checked,
+      facebook: document.getElementById('sns-facebook').checked,
+      reddit: document.getElementById('sns-reddit').checked,
+      threads: document.getElementById('sns-threads').checked,
+      bluesky: document.getElementById('sns-bluesky').checked,
     }
   };
 
