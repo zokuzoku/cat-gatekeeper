@@ -3,6 +3,17 @@ document.querySelectorAll('[data-i18n]').forEach(el => {
   el.textContent = chrome.i18n.getMessage(el.dataset.i18n);
 });
 
+function mergeSettingsWithDefaults(settings) {
+  return {
+    ...defaults,
+    ...settings,
+    sns: {
+      ...defaults.sns,
+      ...(settings.sns || {}),
+    },
+  };
+}
+
 function getClampedNumberValue(inputId, fallbackValue) {
   const input = document.getElementById(inputId);
   const parsedValue = Number.parseInt(input.value, 10);
@@ -49,14 +60,18 @@ const defaults = {
 
 // 設定を読み込む
 chrome.storage.local.get(defaults, (settings) => {
-  document.getElementById('usageLimit').value = settings.usageLimit;
-  document.getElementById('breakTime').value = settings.breakTime;
-  document.getElementById('sns-x').checked = settings.sns.x;
-  document.getElementById('sns-youtube').checked = settings.sns.youtube;
-  document.getElementById('sns-facebook').checked = settings.sns.facebook;
-  document.getElementById('sns-reddit').checked = settings.sns.reddit;
-  document.getElementById('sns-threads').checked = settings.sns.threads;
-  document.getElementById('sns-bluesky').checked = settings.sns.bluesky;
+  const mergedSettings = mergeSettingsWithDefaults(settings);
+
+  document.getElementById('usageLimit').value = mergedSettings.usageLimit;
+  document.getElementById('breakTime').value = mergedSettings.breakTime;
+  document.getElementById('sns-x').checked = mergedSettings.sns.x;
+  document.getElementById('sns-youtube').checked = mergedSettings.sns.youtube;
+  document.getElementById('sns-facebook').checked = mergedSettings.sns.facebook;
+  document.getElementById('sns-reddit').checked = mergedSettings.sns.reddit;
+  document.getElementById('sns-threads').checked = mergedSettings.sns.threads;
+  document.getElementById('sns-bluesky').checked = mergedSettings.sns.bluesky;
+
+  chrome.storage.local.set(mergedSettings);
 });
 
 // 設定を保存する

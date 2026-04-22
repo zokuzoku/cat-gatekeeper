@@ -26,6 +26,9 @@
         "*://*.facebook.com/*",
         "*://*.reddit.com/*",
         "*://*.youtube.com/*",
+        "*://threads.com/*",
+        "*://*.threads.com/*",
+        "*://threads.net/*",
         "*://*.threads.net/*",
         "*://*.bsky.app/*"
       ],
@@ -42,6 +45,9 @@
         "*://*.facebook.com/*",
         "*://*.reddit.com/*",
         "*://*.youtube.com/*",
+        "*://threads.com/*",
+        "*://*.threads.com/*",
+        "*://threads.net/*",
         "*://*.threads.net/*",
         "*://*.bsky.app/*"
       ]

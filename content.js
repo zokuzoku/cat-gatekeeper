@@ -20,6 +20,7 @@ const SITE_MAP = {
   'facebook.com': 'facebook',
   'reddit.com': 'reddit',
   'youtube.com': 'youtube',
+  'threads.com': 'threads',
   'threads.net': 'threads',
   'bsky.app': 'bluesky',
 };
@@ -27,23 +28,49 @@ const SITE_MAP = {
 const hostname = location.hostname;
 const siteKey = Object.entries(SITE_MAP).find(([d]) => hostname.includes(d))?.[1];
 
+function mergeSettingsWithDefaults(settings) {
+  return {
+    usageLimit: settings.usageLimit ?? 60,
+    breakTime: settings.breakTime ?? 5,
+    sns: {
+      x: true,
+      facebook: true,
+      reddit: true,
+      youtube: true,
+      threads: true,
+      bluesky: true,
+      ...(settings.sns || {}),
+    },
+  };
+}
+
 if (siteKey) {
   chrome.storage.local.get({
     sns: { x: true, facebook: true, reddit: true, youtube: true, threads: true, bluesky: true },
     usageLimit: 60,
     breakTime: 5,
   }, (settings) => {
-    if (!settings.sns[siteKey]) return;
-    startTracking(settings.usageLimit, settings.breakTime);
+    const mergedSettings = mergeSettingsWithDefaults(settings);
+
+    if (!mergedSettings.sns[siteKey]) return;
+    startTracking(mergedSettings.usageLimit, mergedSettings.breakTime);
   });
 }
 
 let catIsActive = false;
+let trackerRunning = false;
 
 // ポップアップからのメッセージを受け取る
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
-    sendResponse({ catIsActive });
+    sendResponse({
+      catIsActive,
+      siteKey,
+      hostname,
+      trackerRunning,
+      hasFocus: document.hasFocus(),
+      isHidden: document.hidden,
+    });
     return;
   }
 
@@ -94,6 +121,7 @@ function startTracking(usageLimit, breakTime) {
   stopTracker();
   currentUsageLimit = usageLimit;
   currentBreakTime = breakTime;
+  trackerRunning = true;
   let localSeconds = 0;
 
   resetSeconds = () => { localSeconds = 0; };
@@ -104,6 +132,7 @@ function startTracking(usageLimit, breakTime) {
 
     if (localSeconds >= usageLimit * 60) {
       clearInterval(tracker);
+      trackerRunning = false;
       catIsActive = true;
       showCat(breakTime, usageLimit, () => {
         if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
@@ -111,7 +140,10 @@ function startTracking(usageLimit, breakTime) {
     }
   }, 1000);
 
-  stopTracker = () => clearInterval(tracker);
+  stopTracker = () => {
+    trackerRunning = false;
+    clearInterval(tracker);
+  };
 }
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
