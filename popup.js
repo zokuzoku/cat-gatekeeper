@@ -51,12 +51,6 @@ chrome.storage.local.get(defaults, (settings) => {
   document.getElementById('usageLimit').value = mergedSettings.usageLimit;
   document.getElementById('breakTime').value = mergedSettings.breakTime;
   document.getElementById('customDomains').value = mergedSettings.customDomains.join('\n');
-  document.getElementById('sns-x').checked = mergedSettings.sns.x;
-  document.getElementById('sns-youtube').checked = mergedSettings.sns.youtube;
-  document.getElementById('sns-facebook').checked = mergedSettings.sns.facebook;
-  document.getElementById('sns-reddit').checked = mergedSettings.sns.reddit;
-  document.getElementById('sns-threads').checked = mergedSettings.sns.threads;
-  document.getElementById('sns-bluesky').checked = mergedSettings.sns.bluesky;
 });
 
 // 設定を保存する
@@ -65,14 +59,6 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     usageLimit: getClampedNumberValue('usageLimit', defaults.usageLimit),
     breakTime: getClampedNumberValue('breakTime', defaults.breakTime),
     customDomains: shared.normalizeDomainList(document.getElementById('customDomains').value),
-    sns: {
-      x: document.getElementById('sns-x').checked,
-      youtube: document.getElementById('sns-youtube').checked,
-      facebook: document.getElementById('sns-facebook').checked,
-      reddit: document.getElementById('sns-reddit').checked,
-      threads: document.getElementById('sns-threads').checked,
-      bluesky: document.getElementById('sns-bluesky').checked,
-    }
   };
 
   document.getElementById('usageLimit').value = settings.usageLimit;
@@ -83,5 +69,11 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     const msg = document.getElementById('savedMsg');
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 2000);
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'UPDATE_SETTINGS', settings }, () => {
+        void chrome.runtime.lastError;
+      });
+    });
   });
 });

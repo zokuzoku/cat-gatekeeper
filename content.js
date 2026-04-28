@@ -11,31 +11,14 @@ preloadSleep.muted = true;
 
 const preventScroll = (e) => e.preventDefault();
 
-const SITE_MAP = {
-  'twitter.com': 'x',
-  'x.com': 'x',
-  'facebook.com': 'facebook',
-  'reddit.com': 'reddit',
-  'youtube.com': 'youtube',
-  'threads.com': 'threads',
-  'threads.net': 'threads',
-  'bsky.app': 'bluesky',
-};
-
 const hostname = location.hostname;
-const siteKey = Object.entries(SITE_MAP).find(([d]) =>
-  shared.hostnameMatchesDomain(hostname, d)
-)?.[1];
 
 function mergeSettingsWithDefaults(settings) {
   return shared.normalizeSettings(settings);
 }
 
 function isSiteEnabled(settings) {
-  const snsEnabled = siteKey ? !!settings.sns[siteKey] : false;
-  const customDomainEnabled = shared.isCustomDomain(hostname, settings.customDomains);
-
-  return snsEnabled || customDomainEnabled;
+  return shared.isCustomDomain(hostname, settings.customDomains);
 }
 
 function applySettings(settings) {
@@ -63,7 +46,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
     sendResponse({
       catIsActive,
-      siteKey,
       hostname,
       trackerRunning,
       customDomains: currentCustomDomains,
@@ -149,14 +131,6 @@ function prepareCatAssets() {
 
 chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
   applySettings(settings);
-});
-
-chrome.storage.onChanged.addListener((_changes, areaName) => {
-  if (areaName !== 'local') return;
-
-  chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
-    applySettings(settings);
-  });
 });
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {

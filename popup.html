@@ -3,10 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <style>
+    html {
+      scrollbar-color: #ff6b35 #2e2e2e;
+      scrollbar-width: thin;
+    }
+
+    *::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: #2e2e2e;
+      border-radius: 8px;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: #ff6b35;
+      border: 2px solid #2e2e2e;
+      border-radius: 8px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: #e55a25;
+    }
+
     body {
-      width: 280px;
+      width: 320px;
       font-family: sans-serif;
-      padding: 16px;
+      padding: 14px;
       background: #1a1a1a;
       color: #fff;
     }
@@ -19,7 +43,7 @@
     }
 
     .section {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .section label {
@@ -42,7 +66,7 @@
 
     .section textarea {
       width: 100%;
-      min-height: 96px;
+      min-height: 76px;
       padding: 8px;
       border-radius: 8px;
       border: none;
@@ -52,25 +76,6 @@
       line-height: 1.45;
       resize: vertical;
       box-sizing: border-box;
-    }
-
-    .sns-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .sns-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-    }
-
-    .sns-item input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: #ff6b35;
     }
 
     button {
@@ -129,20 +134,8 @@
   </div>
 
   <div class="section">
-    <label data-i18n="targetSNSLabel"></label>
-    <div class="sns-list">
-      <label class="sns-item"><input type="checkbox" id="sns-x" checked> X (Twitter)</label>
-      <label class="sns-item"><input type="checkbox" id="sns-youtube" checked> YouTube</label>
-      <label class="sns-item"><input type="checkbox" id="sns-facebook" checked> Facebook</label>
-      <label class="sns-item"><input type="checkbox" id="sns-reddit" checked> Reddit</label>
-      <label class="sns-item"><input type="checkbox" id="sns-threads" checked> Threads</label>
-      <label class="sns-item"><input type="checkbox" id="sns-bluesky" checked> Bluesky</label>
-    </div>
-  </div>
-
-  <div class="section">
-    <label for="customDomains">追加サイト</label>
-    <textarea id="customDomains" spellcheck="false" placeholder="example.com&#10;news.ycombinator.com"></textarea>
+    <label for="customDomains">対象サイト</label>
+    <textarea id="customDomains" spellcheck="false" placeholder="x.com&#10;youtube.com&#10;example.com"></textarea>
     <p class="hint">1行に1つ、またはカンマ区切り。URLを貼ってもドメインだけ保存します。</p>
   </div>
 

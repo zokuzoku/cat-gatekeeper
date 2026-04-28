@@ -3,16 +3,16 @@
     "message": "Cat Gatekeeper"
   },
   "appDescription": {
-    "message": "SNSを使いすぎると猫が現れて画面をジャック。かわいい強制休憩アプリ。"
+    "message": "サイトを使いすぎると猫が現れて画面をジャック。かわいい強制休憩アプリ。"
   },
   "usageLimitLabel": {
-    "message": "SNSを何分使ったら猫を出す？"
+    "message": "何分使ったら猫を出す？"
   },
   "breakTimeLabel": {
     "message": "猫が居座る時間（分）"
   },
   "targetSNSLabel": {
-    "message": "対象のSNS"
+    "message": "対象サイト"
   },
   "saveButton": {
     "message": "保存"

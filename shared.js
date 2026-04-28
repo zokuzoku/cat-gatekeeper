@@ -7,20 +7,19 @@
 
   root.CatGatekeeperShared = shared;
 })(typeof globalThis !== 'undefined' ? globalThis : this, () => {
-  const DEFAULT_SNS = Object.freeze({
-    x: true,
-    facebook: true,
-    reddit: true,
-    youtube: true,
-    threads: true,
-    bluesky: true,
-  });
+  const DEFAULT_DOMAINS = Object.freeze([
+    'x.com',
+    'youtube.com',
+    'facebook.com',
+    'reddit.com',
+    'threads.net',
+    'bsky.app',
+  ]);
 
   const DEFAULT_SETTINGS = Object.freeze({
     usageLimit: 60,
     breakTime: 5,
-    customDomains: Object.freeze([]),
-    sns: DEFAULT_SNS,
+    customDomains: DEFAULT_DOMAINS,
   });
 
   function clampNumber(value, min, max, fallback) {
@@ -108,6 +107,11 @@
 
   function normalizeSettings(settings) {
     const safeSettings = settings && typeof settings === 'object' ? settings : {};
+    const customDomains = normalizeDomainList(safeSettings.customDomains);
+    const hasCustomDomainsSetting = Object.prototype.hasOwnProperty.call(
+      safeSettings,
+      'customDomains'
+    );
 
     return {
       usageLimit: clampNumber(
@@ -122,17 +126,15 @@
         60,
         DEFAULT_SETTINGS.breakTime
       ),
-      customDomains: normalizeDomainList(safeSettings.customDomains),
-      sns: {
-        ...DEFAULT_SNS,
-        ...(safeSettings.sns || {}),
-      },
+      customDomains: hasCustomDomainsSetting
+        ? customDomains
+        : [...DEFAULT_SETTINGS.customDomains],
     };
   }
 
   return {
     DEFAULT_SETTINGS,
-    DEFAULT_SNS,
+    DEFAULT_DOMAINS,
     clampNumber,
     hostnameMatchesDomain,
     isCustomDomain,
