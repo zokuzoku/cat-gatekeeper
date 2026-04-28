@@ -1,15 +1,11 @@
-const CAT_VIDEO_URL = chrome.runtime.getURL('assets/neko1.webm');
-const CAT_SLEEP_URL = chrome.runtime.getURL('assets/neko2.webm');
 const shared = globalThis.CatGatekeeperShared;
 
 // 事前読み込み
 const preloadVideo = document.createElement('video');
-preloadVideo.src = CAT_VIDEO_URL;
 preloadVideo.preload = 'auto';
 preloadVideo.muted = true;
 
 const preloadSleep = document.createElement('video');
-preloadSleep.src = CAT_SLEEP_URL;
 preloadSleep.preload = 'auto';
 preloadSleep.muted = true;
 
@@ -106,6 +102,7 @@ let currentUsageLimit = 60;
 let currentBreakTime = 5;
 let currentSnsEnabled = false;
 let currentCustomDomains = [];
+let catAssetsPrepared = false;
 
 // タブを切り替えたらリセット（一度だけ登録）
 document.addEventListener('visibilitychange', () => {
@@ -113,6 +110,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function startTracking(usageLimit, breakTime) {
+  prepareCatAssets();
   stopTracker();
   currentUsageLimit = usageLimit;
   currentBreakTime = breakTime;
@@ -139,6 +137,14 @@ function startTracking(usageLimit, breakTime) {
     trackerRunning = false;
     clearInterval(tracker);
   };
+}
+
+function prepareCatAssets() {
+  if (catAssetsPrepared) return;
+
+  preloadVideo.src = chrome.runtime.getURL('assets/neko1.webm');
+  preloadSleep.src = chrome.runtime.getURL('assets/neko2.webm');
+  catAssetsPrepared = true;
 }
 
 chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
@@ -190,14 +196,14 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
 
   // neko1
   const video = document.createElement('video');
-  video.src = CAT_VIDEO_URL;
+  video.src = chrome.runtime.getURL('assets/neko1.webm');
   video.autoplay = true;
   video.muted = true;
   video.playsInline = true;
 
   // neko2（先読み・非表示）
   const videoSleep = document.createElement('video');
-  videoSleep.src = CAT_SLEEP_URL;
+  videoSleep.src = chrome.runtime.getURL('assets/neko2.webm');
   videoSleep.muted = true;
   videoSleep.playsInline = true;
   videoSleep.loop = true;

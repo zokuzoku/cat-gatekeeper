@@ -57,8 +57,6 @@ chrome.storage.local.get(defaults, (settings) => {
   document.getElementById('sns-reddit').checked = mergedSettings.sns.reddit;
   document.getElementById('sns-threads').checked = mergedSettings.sns.threads;
   document.getElementById('sns-bluesky').checked = mergedSettings.sns.bluesky;
-
-  chrome.storage.local.set(mergedSettings);
 });
 
 // 設定を保存する
