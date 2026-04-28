@@ -3,15 +3,10 @@ document.querySelectorAll('[data-i18n]').forEach(el => {
   el.textContent = chrome.i18n.getMessage(el.dataset.i18n);
 });
 
+const shared = globalThis.CatGatekeeperShared;
+
 function mergeSettingsWithDefaults(settings) {
-  return {
-    ...defaults,
-    ...settings,
-    sns: {
-      ...defaults.sns,
-      ...(settings.sns || {}),
-    },
-  };
+  return shared.normalizeSettings(settings);
 }
 
 function getClampedNumberValue(inputId, fallbackValue) {
@@ -46,16 +41,7 @@ dismissBtn.addEventListener('click', () => {
 });
 
 const defaults = {
-  usageLimit: 60,
-  breakTime: 5,
-  sns: {
-    x: true,
-    facebook: true,
-    reddit: true,
-    youtube: true,
-    threads: true,
-    bluesky: true,
-  }
+  ...shared.DEFAULT_SETTINGS,
 };
 
 // 設定を読み込む
@@ -64,6 +50,7 @@ chrome.storage.local.get(defaults, (settings) => {
 
   document.getElementById('usageLimit').value = mergedSettings.usageLimit;
   document.getElementById('breakTime').value = mergedSettings.breakTime;
+  document.getElementById('customDomains').value = mergedSettings.customDomains.join('\n');
   document.getElementById('sns-x').checked = mergedSettings.sns.x;
   document.getElementById('sns-youtube').checked = mergedSettings.sns.youtube;
   document.getElementById('sns-facebook').checked = mergedSettings.sns.facebook;
@@ -79,6 +66,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
   const settings = {
     usageLimit: getClampedNumberValue('usageLimit', defaults.usageLimit),
     breakTime: getClampedNumberValue('breakTime', defaults.breakTime),
+    customDomains: shared.normalizeDomainList(document.getElementById('customDomains').value),
     sns: {
       x: document.getElementById('sns-x').checked,
       youtube: document.getElementById('sns-youtube').checked,
@@ -91,6 +79,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
 
   document.getElementById('usageLimit').value = settings.usageLimit;
   document.getElementById('breakTime').value = settings.breakTime;
+  document.getElementById('customDomains').value = settings.customDomains.join('\n');
 
   chrome.storage.local.set(settings, () => {
     const msg = document.getElementById('savedMsg');

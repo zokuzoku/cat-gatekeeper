@@ -40,6 +40,20 @@
       box-sizing: border-box;
     }
 
+    .section textarea {
+      width: 100%;
+      min-height: 96px;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      background: #2e2e2e;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.45;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
     .sns-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -92,6 +106,13 @@
       margin-top: 8px;
       display: none;
     }
+
+    .hint {
+      margin: 6px 0 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -119,10 +140,17 @@
     </div>
   </div>
 
+  <div class="section">
+    <label for="customDomains">追加サイト</label>
+    <textarea id="customDomains" spellcheck="false" placeholder="example.com&#10;news.ycombinator.com"></textarea>
+    <p class="hint">1行に1つ、またはカンマ区切り。URLを貼ってもドメインだけ保存します。</p>
+  </div>
+
   <button id="dismissBtn" data-i18n="dismissButton"></button>
   <button id="saveBtn" data-i18n="saveButton"></button>
   <div class="saved" id="savedMsg" data-i18n="savedMessage"></div>
 
+  <script src="shared.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

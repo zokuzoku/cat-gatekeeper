@@ -31,18 +31,10 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.twitter.com/*",
-        "*://*.x.com/*",
-        "*://*.facebook.com/*",
-        "*://*.reddit.com/*",
-        "*://*.youtube.com/*",
-        "*://threads.com/*",
-        "*://*.threads.com/*",
-        "*://threads.net/*",
-        "*://*.threads.net/*",
-        "*://*.bsky.app/*"
+        "http://*/*",
+        "https://*/*"
       ],
-      "js": ["content.js"],
+      "js": ["shared.js", "content.js"],
       "css": ["content.css"]
     }
   ],
@@ -50,16 +42,8 @@
     {
       "resources": ["assets/*"],
       "matches": [
-        "*://*.twitter.com/*",
-        "*://*.x.com/*",
-        "*://*.facebook.com/*",
-        "*://*.reddit.com/*",
-        "*://*.youtube.com/*",
-        "*://threads.com/*",
-        "*://*.threads.com/*",
-        "*://threads.net/*",
-        "*://*.threads.net/*",
-        "*://*.bsky.app/*"
+        "http://*/*",
+        "https://*/*"
       ]
     }
   ]

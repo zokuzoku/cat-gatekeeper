@@ -1,5 +1,6 @@
 const CAT_VIDEO_URL = chrome.runtime.getURL('assets/neko1.webm');
 const CAT_SLEEP_URL = chrome.runtime.getURL('assets/neko2.webm');
+const shared = globalThis.CatGatekeeperShared;
 
 // 事前読み込み
 const preloadVideo = document.createElement('video');
@@ -26,35 +27,36 @@ const SITE_MAP = {
 };
 
 const hostname = location.hostname;
-const siteKey = Object.entries(SITE_MAP).find(([d]) => hostname.includes(d))?.[1];
+const siteKey = Object.entries(SITE_MAP).find(([d]) =>
+  shared.hostnameMatchesDomain(hostname, d)
+)?.[1];
 
 function mergeSettingsWithDefaults(settings) {
-  return {
-    usageLimit: settings.usageLimit ?? 60,
-    breakTime: settings.breakTime ?? 5,
-    sns: {
-      x: true,
-      facebook: true,
-      reddit: true,
-      youtube: true,
-      threads: true,
-      bluesky: true,
-      ...(settings.sns || {}),
-    },
-  };
+  return shared.normalizeSettings(settings);
 }
 
-if (siteKey) {
-  chrome.storage.local.get({
-    sns: { x: true, facebook: true, reddit: true, youtube: true, threads: true, bluesky: true },
-    usageLimit: 60,
-    breakTime: 5,
-  }, (settings) => {
-    const mergedSettings = mergeSettingsWithDefaults(settings);
+function isSiteEnabled(settings) {
+  const snsEnabled = siteKey ? !!settings.sns[siteKey] : false;
+  const customDomainEnabled = shared.isCustomDomain(hostname, settings.customDomains);
 
-    if (!mergedSettings.sns[siteKey]) return;
-    startTracking(mergedSettings.usageLimit, mergedSettings.breakTime);
-  });
+  return snsEnabled || customDomainEnabled;
+}
+
+function applySettings(settings) {
+  const mergedSettings = mergeSettingsWithDefaults(settings);
+  currentUsageLimit = mergedSettings.usageLimit;
+  currentBreakTime = mergedSettings.breakTime;
+  currentCustomDomains = mergedSettings.customDomains;
+  currentSnsEnabled = isSiteEnabled(mergedSettings);
+
+  if (!currentSnsEnabled) {
+    stopTracker();
+    return;
+  }
+
+  if (!catIsActive) {
+    startTracking(currentUsageLimit, currentBreakTime);
+  }
 }
 
 let catIsActive = false;
@@ -68,24 +70,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       siteKey,
       hostname,
       trackerRunning,
+      customDomains: currentCustomDomains,
+      isTracked: currentSnsEnabled,
       hasFocus: document.hasFocus(),
       isHidden: document.hidden,
     });
     return;
   }
 
-  if (message.type === 'UPDATE_SETTINGS' && siteKey) {
-    const { settings } = message;
-    currentUsageLimit = settings.usageLimit;
-    currentBreakTime = settings.breakTime;
-    currentSnsEnabled = !!settings.sns[siteKey];
-    if (!currentSnsEnabled) {
-      stopTracker();
-      return;
-    }
-    if (!catIsActive) {
-      startTracking(settings.usageLimit, settings.breakTime);
-    }
+  if (message.type === 'UPDATE_SETTINGS') {
+    applySettings(message.settings);
   }
 
   if (message.type === 'DISMISS_CAT') {
@@ -110,7 +104,8 @@ let stopTracker = () => {};
 let stopCountdown = () => {};
 let currentUsageLimit = 60;
 let currentBreakTime = 5;
-let currentSnsEnabled = true;
+let currentSnsEnabled = false;
+let currentCustomDomains = [];
 
 // タブを切り替えたらリセット（一度だけ登録）
 document.addEventListener('visibilitychange', () => {
@@ -145,6 +140,18 @@ function startTracking(usageLimit, breakTime) {
     clearInterval(tracker);
   };
 }
+
+chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
+  applySettings(settings);
+});
+
+chrome.storage.onChanged.addListener((_changes, areaName) => {
+  if (areaName !== 'local') return;
+
+  chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
+    applySettings(settings);
+  });
+});
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
   const overlay = document.createElement('div');
