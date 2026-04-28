@@ -83,11 +83,5 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     const msg = document.getElementById('savedMsg');
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 2000);
-
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { type: 'UPDATE_SETTINGS', settings }, () => {
-        void chrome.runtime.lastError;
-      });
-    });
   });
 });
