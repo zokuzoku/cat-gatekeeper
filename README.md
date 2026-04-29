@@ -3,6 +3,10 @@
 Cat Gatekeeper is a browser extension that shows a cat break screen after you
 spend too long on selected websites.
 
+## Contact
+
+Questions, bug reports, and feature requests are welcome via GitHub Issues.
+
 ## License
 
 The source code is licensed under the MIT License. See [LICENSE](LICENSE).
