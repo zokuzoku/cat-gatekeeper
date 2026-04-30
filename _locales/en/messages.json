@@ -22,5 +22,8 @@
   },
   "dismissButton": {
     "message": "Shoo, kitty!"
+  },
+  "customDomainsHint": {
+    "message": "One per line, or separated by commas. Full URLs are saved as domains only."
   }
 }

@@ -36,10 +36,19 @@
     }
 
     h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
       font-size: 16px;
       margin: 0 0 16px;
       text-align: center;
       color: #fff;
+    }
+
+    .title-emoji {
+      font-size: 16px;
+      line-height: 1;
     }
 
     .section {
@@ -121,7 +130,7 @@
   </style>
 </head>
 <body>
-  <h1>🐱 Cat Gatekeeper</h1>
+  <h1><span class="title-emoji" aria-hidden="true">🐈️</span><span>Cat Gatekeeper</span></h1>
 
   <div class="section">
     <label data-i18n="usageLimitLabel"></label>
@@ -134,9 +143,9 @@
   </div>
 
   <div class="section">
-    <label for="customDomains">対象サイト</label>
+    <label for="customDomains" data-i18n="targetSNSLabel"></label>
     <textarea id="customDomains" spellcheck="false" placeholder="x.com&#10;youtube.com&#10;example.com"></textarea>
-    <p class="hint">1行に1つ、またはカンマ区切り。URLを貼ってもドメインだけ保存します。</p>
+    <p class="hint" data-i18n="customDomainsHint"></p>
   </div>
 
   <button id="dismissBtn" data-i18n="dismissButton"></button>

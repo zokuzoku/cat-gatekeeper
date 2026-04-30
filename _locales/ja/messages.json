@@ -22,5 +22,8 @@
   },
   "dismissButton": {
     "message": "退いてもらう"
+  },
+  "customDomainsHint": {
+    "message": "1行に1つ、またはカンマ区切り。URLを貼ってもドメインだけ保存します。"
   }
 }
