@@ -74,8 +74,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'DISMISS_CAT') {
     const overlay = document.getElementById('cat-gatekeeper-overlay');
     if (!overlay) return;
+    const dismissedUsageKey = currentUsageKey;
     catIsActive = false;
     stopCountdown();
+    resetUsageSeconds(dismissedUsageKey);
     overlay.style.transition = 'opacity 0.5s';
     overlay.style.opacity = '0';
     setTimeout(() => {
@@ -83,7 +85,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       document.documentElement.style.overflow = '';
       document.removeEventListener('wheel', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
-      if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
+      if (currentSnsEnabled && dismissedUsageKey === currentUsageKey) {
+        startTracking(currentUsageLimit, currentBreakTime);
+      }
     }, 500);
   }
 });
@@ -196,7 +200,9 @@ function startTracking(usageLimit, breakTime) {
         catIsActive = true;
         resetUsageSeconds(usageKey);
         showCat(breakTime, usageLimit, () => {
-          if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
+          if (currentSnsEnabled && usageKey === currentUsageKey) {
+            startTracking(currentUsageLimit, currentBreakTime);
+          }
         });
       }
     }, 1000);
