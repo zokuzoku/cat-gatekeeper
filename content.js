@@ -12,13 +12,22 @@ preloadSleep.muted = true;
 const preventScroll = (e) => e.preventDefault();
 
 const hostname = location.hostname;
+const USAGE_STORAGE_KEY = 'catGatekeeperUsage';
+const USAGE_STALE_AFTER_MS = 30 * 60 * 1000;
+const USAGE_SAVE_INTERVAL_SECONDS = 5;
 
 function mergeSettingsWithDefaults(settings) {
   return shared.normalizeSettings(settings);
 }
 
+function getMatchedDomain(settings) {
+  return shared.normalizeDomainList(settings.customDomains).find((domain) =>
+    shared.hostnameMatchesDomain(hostname, domain)
+  ) || '';
+}
+
 function isSiteEnabled(settings) {
-  return shared.isCustomDomain(hostname, settings.customDomains);
+  return !!getMatchedDomain(settings);
 }
 
 function applySettings(settings) {
@@ -26,7 +35,8 @@ function applySettings(settings) {
   currentUsageLimit = mergedSettings.usageLimit;
   currentBreakTime = mergedSettings.breakTime;
   currentCustomDomains = mergedSettings.customDomains;
-  currentSnsEnabled = isSiteEnabled(mergedSettings);
+  currentUsageKey = getMatchedDomain(mergedSettings);
+  currentSnsEnabled = !!currentUsageKey;
 
   if (!currentSnsEnabled) {
     stopTracker();
@@ -50,6 +60,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       trackerRunning,
       customDomains: currentCustomDomains,
       isTracked: currentSnsEnabled,
+      trackedDomain: currentUsageKey,
       hasFocus: document.hasFocus(),
       isHidden: document.hidden,
     });
@@ -84,41 +95,119 @@ let currentUsageLimit = 60;
 let currentBreakTime = 5;
 let currentSnsEnabled = false;
 let currentCustomDomains = [];
+let currentUsageKey = '';
 let catAssetsPrepared = false;
+let trackerRunId = 0;
 
-// タブを切り替えたらリセット（一度だけ登録）
+function getUsageStorageKey(usageKey) {
+  return `${USAGE_STORAGE_KEY}:${usageKey}`;
+}
+
+function loadUsageSeconds(usageKey, callback) {
+  const storageKey = getUsageStorageKey(usageKey);
+
+  chrome.storage.local.get({ [storageKey]: null }, (result) => {
+    const entry = result[storageKey];
+    const now = Date.now();
+
+    if (!entry || typeof entry !== 'object') {
+      callback(0);
+      return;
+    }
+
+    if (now - Number(entry.updatedAt || 0) > USAGE_STALE_AFTER_MS) {
+      callback(0);
+      return;
+    }
+
+    callback(Math.max(0, Number.parseInt(entry.seconds, 10) || 0));
+  });
+}
+
+function saveUsageSeconds(usageKey, seconds) {
+  if (!usageKey) return;
+
+  chrome.storage.local.set({
+    [getUsageStorageKey(usageKey)]: {
+      seconds: Math.max(0, seconds),
+      updatedAt: Date.now(),
+    },
+  });
+}
+
+function resetUsageSeconds(usageKey) {
+  saveUsageSeconds(usageKey, 0);
+}
+
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) resetSeconds();
+});
+
+window.addEventListener('pagehide', () => {
+  resetSeconds();
 });
 
 function startTracking(usageLimit, breakTime) {
   prepareCatAssets();
   stopTracker();
+  const runId = ++trackerRunId;
   currentUsageLimit = usageLimit;
   currentBreakTime = breakTime;
-  trackerRunning = true;
-  let localSeconds = 0;
+  const usageKey = currentUsageKey;
 
-  resetSeconds = () => { localSeconds = 0; };
-
-  const tracker = setInterval(() => {
-    if (document.hidden || !document.hasFocus()) return;
-    localSeconds++;
-
-    if (localSeconds >= usageLimit * 60) {
-      clearInterval(tracker);
-      trackerRunning = false;
-      catIsActive = true;
-      showCat(breakTime, usageLimit, () => {
-        if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
-      });
+  loadUsageSeconds(usageKey, (initialSeconds) => {
+    if (
+      runId !== trackerRunId ||
+      usageKey !== currentUsageKey ||
+      catIsActive ||
+      !currentSnsEnabled
+    ) {
+      return;
     }
-  }, 1000);
 
-  stopTracker = () => {
-    trackerRunning = false;
-    clearInterval(tracker);
-  };
+    trackerRunning = true;
+    let localSeconds = initialSeconds;
+    let secondsSinceSave = 0;
+
+    resetSeconds = () => {
+      saveUsageSeconds(usageKey, localSeconds);
+    };
+
+    const tracker = setInterval(() => {
+      if (usageKey !== currentUsageKey || catIsActive || !currentSnsEnabled) {
+        clearInterval(tracker);
+        trackerRunning = false;
+        return;
+      }
+
+      if (document.hidden || !document.hasFocus()) return;
+
+      localSeconds++;
+      secondsSinceSave++;
+
+      if (secondsSinceSave >= USAGE_SAVE_INTERVAL_SECONDS) {
+        saveUsageSeconds(usageKey, localSeconds);
+        secondsSinceSave = 0;
+      }
+
+      if (localSeconds >= usageLimit * 60) {
+        clearInterval(tracker);
+        trackerRunning = false;
+        catIsActive = true;
+        resetUsageSeconds(usageKey);
+        showCat(breakTime, usageLimit, () => {
+          if (currentSnsEnabled) startTracking(currentUsageLimit, currentBreakTime);
+        });
+      }
+    }, 1000);
+
+    stopTracker = () => {
+      trackerRunning = false;
+      saveUsageSeconds(usageKey, localSeconds);
+      clearInterval(tracker);
+      trackerRunId++;
+    };
+  });
 }
 
 function prepareCatAssets() {
