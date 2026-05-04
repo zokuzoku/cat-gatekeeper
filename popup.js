@@ -1,4 +1,4 @@
-// 翻訳を適用
+// Apply translations
 document.querySelectorAll('[data-i18n]').forEach(el => {
   el.textContent = chrome.i18n.getMessage(el.dataset.i18n);
 });
@@ -22,7 +22,7 @@ function getClampedNumberValue(inputId, fallbackValue) {
   return Math.min(Math.max(parsedValue, minValue), maxValue);
 }
 
-// 猫が出てるときだけ閉じるボタンを表示
+// Show the dismiss button only when the cat is active
 const dismissBtn = document.getElementById('dismissBtn');
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_CAT_STATUS' }, (res) => {
@@ -44,7 +44,7 @@ const defaults = {
   ...shared.DEFAULT_SETTINGS,
 };
 
-// 設定を読み込む
+// Load settings
 chrome.storage.local.get(defaults, (settings) => {
   const mergedSettings = mergeSettingsWithDefaults(settings);
 
@@ -53,7 +53,7 @@ chrome.storage.local.get(defaults, (settings) => {
   document.getElementById('customDomains').value = mergedSettings.customDomains.join('\n');
 });
 
-// 設定を保存する
+// Save settings
 document.getElementById('saveBtn').addEventListener('click', () => {
   const settings = {
     usageLimit: getClampedNumberValue('usageLimit', defaults.usageLimit),

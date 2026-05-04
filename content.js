@@ -1,13 +1,6 @@
 const shared = globalThis.CatGatekeeperShared;
 
-// 事前読み込み
-const preloadVideo = document.createElement('video');
-preloadVideo.preload = 'auto';
-preloadVideo.muted = true;
 
-const preloadSleep = document.createElement('video');
-preloadSleep.preload = 'auto';
-preloadSleep.muted = true;
 
 const preventScroll = (e) => e.preventDefault();
 
@@ -51,7 +44,29 @@ function applySettings(settings) {
 let catIsActive = false;
 let trackerRunning = false;
 
-// ポップアップからのメッセージを受け取る
+// Shadow DOM helper
+function getShadowRoot() {
+  const hostId = 'cat-gk-host';
+  let host = document.getElementById(hostId);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = hostId;
+    // Keep the host invisible but at the highest z-index
+    host.style.position = 'fixed';
+    host.style.top = '0';
+    host.style.left = '0';
+    host.style.width = '0';
+    host.style.height = '0';
+    host.style.zIndex = '2147483647';
+    document.documentElement.appendChild(host);
+  }
+  if (!host.shadowRoot) {
+    host.attachShadow({ mode: 'open' });
+  }
+  return host.shadowRoot;
+}
+
+// Receive messages from the popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
     sendResponse({
@@ -72,7 +87,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === 'DISMISS_CAT') {
-    const overlay = document.getElementById('cat-gatekeeper-overlay');
+    const shadow = getShadowRoot();
+    const overlay = shadow.getElementById('cat-gatekeeper-overlay');
     if (!overlay) return;
     const dismissedUsageKey = currentUsageKey;
     catIsActive = false;
@@ -103,6 +119,10 @@ let currentUsageKey = '';
 let catAssetsPrepared = false;
 let trackerRunId = 0;
 
+// Preload assets
+const preloadVideo = document.createElement('video');
+const preloadSleep = document.createElement('video');
+
 function getUsageStorageKey(usageKey) {
   return `${USAGE_STORAGE_KEY}:${usageKey}`;
 }
@@ -110,33 +130,47 @@ function getUsageStorageKey(usageKey) {
 function loadUsageSeconds(usageKey, callback) {
   const storageKey = getUsageStorageKey(usageKey);
 
-  chrome.storage.local.get({ [storageKey]: null }, (result) => {
-    const entry = result[storageKey];
-    const now = Date.now();
+  try {
+    chrome.storage.local.get({ [storageKey]: null }, (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('Cat Gatekeeper: Storage access failed', chrome.runtime.lastError);
+        callback(0);
+        return;
+      }
+      const entry = result[storageKey];
+      const now = Date.now();
 
-    if (!entry || typeof entry !== 'object') {
-      callback(0);
-      return;
-    }
+      if (!entry || typeof entry !== 'object') {
+        callback(0);
+        return;
+      }
 
-    if (now - Number(entry.updatedAt || 0) > USAGE_STALE_AFTER_MS) {
-      callback(0);
-      return;
-    }
+      if (now - Number(entry.updatedAt || 0) > USAGE_STALE_AFTER_MS) {
+        callback(0);
+        return;
+      }
 
-    callback(Math.max(0, Number.parseInt(entry.seconds, 10) || 0));
-  });
+      callback(Math.max(0, Number.parseInt(entry.seconds, 10) || 0));
+    });
+  } catch (e) {
+    console.error('Cat Gatekeeper: Storage error', e);
+    callback(0);
+  }
 }
 
 function saveUsageSeconds(usageKey, seconds) {
   if (!usageKey) return;
 
-  chrome.storage.local.set({
-    [getUsageStorageKey(usageKey)]: {
-      seconds: Math.max(0, seconds),
-      updatedAt: Date.now(),
-    },
-  });
+  try {
+    chrome.storage.local.set({
+      [getUsageStorageKey(usageKey)]: {
+        seconds: Math.max(0, seconds),
+        updatedAt: Date.now(),
+      },
+    });
+  } catch (e) {
+    console.error('Cat Gatekeeper: Failed to save usage', e);
+  }
 }
 
 function resetUsageSeconds(usageKey) {
@@ -169,12 +203,26 @@ function startTracking(usageLimit, breakTime) {
       return;
     }
 
+    // Show cat immediately if time limit is already exceeded
+    if (initialSeconds >= usageLimit * 60) {
+      catIsActive = true;
+      resetUsageSeconds(usageKey);
+      showCat(breakTime, usageLimit, () => {
+        if (currentSnsEnabled && usageKey === currentUsageKey) {
+          startTracking(currentUsageLimit, currentBreakTime);
+        }
+      });
+      return;
+    }
+
     trackerRunning = true;
     let localSeconds = initialSeconds;
     let secondsSinceSave = 0;
 
     resetSeconds = () => {
-      saveUsageSeconds(usageKey, localSeconds);
+      if (!catIsActive) {
+        saveUsageSeconds(usageKey, localSeconds);
+      }
     };
 
     const tracker = setInterval(() => {
@@ -198,6 +246,8 @@ function startTracking(usageLimit, breakTime) {
         clearInterval(tracker);
         trackerRunning = false;
         catIsActive = true;
+        // Ensure the next session starts from 0
+        localSeconds = 0;
         resetUsageSeconds(usageKey);
         showCat(breakTime, usageLimit, () => {
           if (currentSnsEnabled && usageKey === currentUsageKey) {
@@ -209,18 +259,28 @@ function startTracking(usageLimit, breakTime) {
 
     stopTracker = () => {
       trackerRunning = false;
-      saveUsageSeconds(usageKey, localSeconds);
       clearInterval(tracker);
+      // Don't save if cat is active (resetting)
+      if (!catIsActive) {
+        saveUsageSeconds(usageKey, localSeconds);
+      }
       trackerRunId++;
     };
   });
 }
 
+
 function prepareCatAssets() {
   if (catAssetsPrepared) return;
 
+  preloadVideo.preload = 'auto';
+  preloadVideo.muted = true;
   preloadVideo.src = chrome.runtime.getURL('assets/neko1.webm');
+
+  preloadSleep.preload = 'auto';
+  preloadSleep.muted = true;
   preloadSleep.src = chrome.runtime.getURL('assets/neko2.webm');
+
   catAssetsPrepared = true;
 }
 
@@ -229,10 +289,24 @@ chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
 });
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
+  const shadow = getShadowRoot();
+  const host = document.getElementById('cat-gk-host');
+  host.style.width = '100vw';
+  host.style.height = '100vh';
+
+  // Inject CSS into Shadow DOM
+  if (!shadow.querySelector('link')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL('content.css');
+    shadow.appendChild(link);
+  }
+
+
   const overlay = document.createElement('div');
   overlay.id = 'cat-gatekeeper-overlay';
 
-  // カウントダウン
+  // Countdown timer
   const countdown = document.createElement('div');
   countdown.id = 'cat-gatekeeper-countdown';
   let seconds = breakMinutes * 60;
@@ -254,6 +328,8 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       overlay.style.opacity = '0';
       setTimeout(() => {
         overlay.remove();
+        host.style.width = '0';
+        host.style.height = '0';
         document.documentElement.style.overflow = '';
         document.removeEventListener('wheel', preventScroll);
         document.removeEventListener('touchmove', preventScroll);
@@ -263,14 +339,14 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   }
   updateCountdown();
 
-  // neko1
+  // neko1 video
   const video = document.createElement('video');
   video.src = chrome.runtime.getURL('assets/neko1.webm');
   video.autoplay = true;
   video.muted = true;
   video.playsInline = true;
 
-  // neko2（先読み・非表示）
+  // neko2 video (preload and hidden)
   const videoSleep = document.createElement('video');
   videoSleep.src = chrome.runtime.getURL('assets/neko2.webm');
   videoSleep.muted = true;
@@ -281,21 +357,27 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   overlay.appendChild(countdown);
   overlay.appendChild(video);
   overlay.appendChild(videoSleep);
-  document.body.appendChild(overlay);
+  shadow.appendChild(overlay);
+
   document.documentElement.style.overflow = 'hidden';
   document.addEventListener('wheel', preventScroll, { passive: false });
   document.addEventListener('touchmove', preventScroll, { passive: false });
 
-  // ページ上の動画を一時停止（猫の動画は除く）
-  document.querySelectorAll('video').forEach(v => {
-    if (v !== video && v !== videoSleep) v.pause();
-  });
+  // Pause page videos (excluding the cat videos)
+  try {
+    document.querySelectorAll('video').forEach(v => {
+      if (v !== video && v !== videoSleep && !shadow.contains(v)) v.pause();
+    });
+  } catch (e) {
+    console.error('Cat Gatekeeper: Failed to pause page videos', e);
+  }
 
-  // neko1が終わったらneko2に切り替え
+  // Switch to neko2 when neko1 ends
   video.addEventListener('ended', () => {
     video.style.display = 'none';
     videoSleep.style.display = 'block';
     videoSleep.classList.add('sleeping');
-    videoSleep.play();
+    videoSleep.play().catch(e => console.error('Cat Gatekeeper: Video play failed', e));
   });
 }
+
