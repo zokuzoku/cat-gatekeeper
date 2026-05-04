@@ -238,6 +238,8 @@ function prepareCatAssets() {
 
   preloadVideo.src = chrome.runtime.getURL('assets/neko1.webm');
   preloadSleep.src = chrome.runtime.getURL('assets/neko2.webm');
+  preloadVideo.load();
+  preloadSleep.load();
   catAssetsPrepared = true;
 }
 

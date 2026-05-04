@@ -9,6 +9,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const DEFAULT_DOMAINS = Object.freeze([
     'x.com',
+    'twitter.com',
     'youtube.com',
     'facebook.com',
     'reddit.com',
@@ -24,7 +25,7 @@
   });
 
   const LEGACY_SNS_DOMAINS = Object.freeze({
-    x: 'x.com',
+    x: ['x.com', 'twitter.com'],
     youtube: 'youtube.com',
     facebook: 'facebook.com',
     reddit: 'reddit.com',
@@ -128,7 +129,7 @@
     const legacyCustomDomains = legacySns
       ? Object.entries(LEGACY_SNS_DOMAINS)
         .filter(([key]) => legacySns[key] !== false)
-        .map(([, domain]) => domain)
+        .flatMap(([, domain]) => domain)
       : null;
 
     return {
