@@ -30,13 +30,13 @@ function isSiteEnabled(settings) {
   return !!getMatchedDomain(settings);
 }
 
-function applySettings(settings) {
+function applySettings(settings, { resetUsage = false } = {}) {
   const mergedSettings = mergeSettingsWithDefaults(settings);
   currentUsageLimit = mergedSettings.usageLimit;
   currentBreakTime = mergedSettings.breakTime;
   currentCustomDomains = mergedSettings.customDomains;
   currentUsageKey = getMatchedDomain(mergedSettings);
-  currentSnsEnabled = !!currentUsageKey;
+  currentSnsEnabled = mergedSettings.catEnabled && !!currentUsageKey;
 
   if (!currentSnsEnabled) {
     stopTracker();
@@ -44,7 +44,7 @@ function applySettings(settings) {
   }
 
   if (!catIsActive) {
-    startTracking(currentUsageLimit, currentBreakTime);
+    startTracking(currentUsageLimit, currentBreakTime, { resetUsage });
   }
 }
 
@@ -68,7 +68,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === 'UPDATE_SETTINGS') {
-    applySettings(message.settings);
+    stopTracker();
+    applySettings(message.settings, { resetUsage: true });
   }
 
   if (message.type === 'DISMISS_CAT') {
@@ -151,13 +152,17 @@ window.addEventListener('pagehide', () => {
   resetSeconds();
 });
 
-function startTracking(usageLimit, breakTime) {
+function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
   prepareCatAssets();
   stopTracker();
   const runId = ++trackerRunId;
   currentUsageLimit = usageLimit;
   currentBreakTime = breakTime;
   const usageKey = currentUsageKey;
+
+  if (resetUsage) {
+    resetUsageSeconds(usageKey);
+  }
 
   loadUsageSeconds(usageKey, (initialSeconds) => {
     if (
@@ -170,7 +175,7 @@ function startTracking(usageLimit, breakTime) {
     }
 
     trackerRunning = true;
-    let localSeconds = initialSeconds;
+    let localSeconds = resetUsage ? 0 : initialSeconds;
     let secondsSinceSave = 0;
     let shouldPersistUsage = true;
 
@@ -236,7 +241,7 @@ function prepareCatAssets() {
   catAssetsPrepared = true;
 }
 
-chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
+chrome.storage.local.get(null, (settings) => {
   applySettings(settings);
 });
 

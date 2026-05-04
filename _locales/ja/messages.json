@@ -14,6 +14,9 @@
   "targetSNSLabel": {
     "message": "対象サイト"
   },
+  "catEnabledLabel": {
+    "message": "猫を表示する"
+  },
   "saveButton": {
     "message": "保存"
   },
@@ -24,6 +27,9 @@
     "message": "退いてもらう"
   },
   "customDomainsHint": {
-    "message": "1行に1つ、またはカンマ区切り。URLを貼ってもドメインだけ保存します。"
+    "message": "1行に1つ、またはカンマ区切り。URLも使えます。"
+  },
+  "officialSiteLink": {
+    "message": "Official site"
   }
 }

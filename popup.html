@@ -36,19 +36,10 @@
     }
 
     h1 {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
       font-size: 16px;
       margin: 0 0 16px;
       text-align: center;
       color: #fff;
-    }
-
-    .title-emoji {
-      font-size: 16px;
-      line-height: 1;
     }
 
     .section {
@@ -127,19 +118,61 @@
       line-height: 1.4;
       color: #888;
     }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: #ddd;
+      cursor: pointer;
+    }
+
+    .toggle-row input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: #ff6b35;
+    }
+
+    .footer-link {
+      display: block;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: Arial, sans-serif;
+      letter-spacing: 0.08em;
+      word-spacing: 2px;
+      color: #aaa;
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <h1><span class="title-emoji" aria-hidden="true">🐈️</span><span>Cat Gatekeeper</span></h1>
+  <h1>Cat Gatekeeper</h1>
 
   <div class="section">
     <label data-i18n="usageLimitLabel"></label>
-    <input type="number" id="usageLimit" min="1" max="480" value="60">
+    <input type="number" id="usageLimit" min="1" max="480" value="30">
   </div>
 
   <div class="section">
     <label data-i18n="breakTimeLabel"></label>
     <input type="number" id="breakTime" min="1" max="60" value="5">
+  </div>
+
+  <div class="section">
+    <label class="toggle-row">
+      <input type="checkbox" id="catEnabled">
+      <span data-i18n="catEnabledLabel"></span>
+    </label>
   </div>
 
   <div class="section">
@@ -151,6 +184,7 @@
   <button id="dismissBtn" data-i18n="dismissButton"></button>
   <button id="saveBtn" data-i18n="saveButton"></button>
   <div class="saved" id="savedMsg" data-i18n="savedMessage"></div>
+  <a class="footer-link" href="https://zokuzoku.github.io/cat-gatekeeper/" target="_blank" rel="noopener" data-i18n="officialSiteLink"></a>
 
   <script src="shared.js"></script>
   <script src="popup.js"></script>

@@ -45,17 +45,19 @@ const defaults = {
 };
 
 // 設定を読み込む
-chrome.storage.local.get(defaults, (settings) => {
+chrome.storage.local.get(null, (settings) => {
   const mergedSettings = mergeSettingsWithDefaults(settings);
 
   document.getElementById('usageLimit').value = mergedSettings.usageLimit;
   document.getElementById('breakTime').value = mergedSettings.breakTime;
   document.getElementById('customDomains').value = mergedSettings.customDomains.join('\n');
+  document.getElementById('catEnabled').checked = mergedSettings.catEnabled;
 });
 
 // 設定を保存する
 document.getElementById('saveBtn').addEventListener('click', () => {
   const settings = {
+    catEnabled: document.getElementById('catEnabled').checked,
     usageLimit: getClampedNumberValue('usageLimit', defaults.usageLimit),
     breakTime: getClampedNumberValue('breakTime', defaults.breakTime),
     customDomains: shared.normalizeDomainList(document.getElementById('customDomains').value),

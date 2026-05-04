@@ -17,9 +17,19 @@
   ]);
 
   const DEFAULT_SETTINGS = Object.freeze({
-    usageLimit: 60,
+    catEnabled: true,
+    usageLimit: 30,
     breakTime: 5,
     customDomains: DEFAULT_DOMAINS,
+  });
+
+  const LEGACY_SNS_DOMAINS = Object.freeze({
+    x: 'x.com',
+    youtube: 'youtube.com',
+    facebook: 'facebook.com',
+    reddit: 'reddit.com',
+    threads: 'threads.net',
+    bluesky: 'bsky.app',
   });
 
   function clampNumber(value, min, max, fallback) {
@@ -112,8 +122,17 @@
       safeSettings,
       'customDomains'
     );
+    const legacySns = safeSettings.sns && typeof safeSettings.sns === 'object'
+      ? safeSettings.sns
+      : null;
+    const legacyCustomDomains = legacySns
+      ? Object.entries(LEGACY_SNS_DOMAINS)
+        .filter(([key]) => legacySns[key] !== false)
+        .map(([, domain]) => domain)
+      : null;
 
     return {
+      catEnabled: safeSettings.catEnabled !== false,
       usageLimit: clampNumber(
         safeSettings.usageLimit,
         1,
@@ -128,6 +147,8 @@
       ),
       customDomains: hasCustomDomainsSetting
         ? customDomains
+        : legacyCustomDomains
+          ? legacyCustomDomains
         : [...DEFAULT_SETTINGS.customDomains],
     };
   }
