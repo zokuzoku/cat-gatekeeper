@@ -144,7 +144,7 @@ function resetUsageSeconds(usageKey) {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) resetSeconds();
+  if (document.hidden) resetSeconds({ clearStoredUsage: true });
 });
 
 window.addEventListener('pagehide', () => {
@@ -172,8 +172,16 @@ function startTracking(usageLimit, breakTime) {
     trackerRunning = true;
     let localSeconds = initialSeconds;
     let secondsSinceSave = 0;
+    let shouldPersistUsage = true;
 
-    resetSeconds = () => {
+    resetSeconds = ({ clearStoredUsage = false } = {}) => {
+      if (clearStoredUsage) {
+        shouldPersistUsage = false;
+        localSeconds = 0;
+        resetUsageSeconds(usageKey);
+        return;
+      }
+
       saveUsageSeconds(usageKey, localSeconds);
     };
 
@@ -198,6 +206,8 @@ function startTracking(usageLimit, breakTime) {
         clearInterval(tracker);
         trackerRunning = false;
         catIsActive = true;
+        shouldPersistUsage = false;
+        localSeconds = 0;
         resetUsageSeconds(usageKey);
         showCat(breakTime, usageLimit, () => {
           if (currentSnsEnabled && usageKey === currentUsageKey) {
@@ -209,7 +219,9 @@ function startTracking(usageLimit, breakTime) {
 
     stopTracker = () => {
       trackerRunning = false;
-      saveUsageSeconds(usageKey, localSeconds);
+      if (shouldPersistUsage) {
+        saveUsageSeconds(usageKey, localSeconds);
+      }
       clearInterval(tracker);
       trackerRunId++;
     };
@@ -229,8 +241,12 @@ chrome.storage.local.get(shared.DEFAULT_SETTINGS, (settings) => {
 });
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
+  document.getElementById('cat-gatekeeper-overlay')?.remove();
+
   const overlay = document.createElement('div');
   overlay.id = 'cat-gatekeeper-overlay';
+  overlay.style.setProperty('opacity', '1', 'important');
+  overlay.style.transition = '';
 
   // カウントダウン
   const countdown = document.createElement('div');
@@ -269,6 +285,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   video.autoplay = true;
   video.muted = true;
   video.playsInline = true;
+  video.style.opacity = '1';
 
   // neko2（先読み・非表示）
   const videoSleep = document.createElement('video');
@@ -277,6 +294,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   videoSleep.playsInline = true;
   videoSleep.loop = true;
   videoSleep.style.display = 'none';
+  videoSleep.style.opacity = '1';
 
   overlay.appendChild(countdown);
   overlay.appendChild(video);
