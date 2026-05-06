@@ -9,7 +9,7 @@
     }
 
     *::-webkit-scrollbar {
-      width: 10px;
+      width: 6px;
     }
 
     *::-webkit-scrollbar-track {
@@ -19,7 +19,6 @@
 
     *::-webkit-scrollbar-thumb {
       background: #ff6b35;
-      border: 2px solid #2e2e2e;
       border-radius: 8px;
     }
 
@@ -33,52 +32,309 @@
       padding: 14px;
       background: #1a1a1a;
       color: #fff;
+      margin: 0;
     }
 
     h1 {
       font-size: 16px;
-      margin: 0 0 16px;
-      text-align: center;
+      margin: 0 0 14px;
       color: #fff;
     }
 
-    .section {
-      margin-bottom: 14px;
+    /* Category cards */
+    #categoriesContainer {
+      margin-bottom: 8px;
     }
 
-    .section label {
-      display: block;
-      font-size: 12px;
-      color: #aaa;
+    .category-card {
       margin-bottom: 6px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #252525;
     }
 
-    .section input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      background: #2e2e2e;
-      color: #fff;
-      font-size: 14px;
-      box-sizing: border-box;
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 10px;
+      cursor: pointer;
+      user-select: none;
     }
 
-    .section textarea {
-      width: 100%;
-      min-height: 76px;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
+    .category-header:hover {
       background: #2e2e2e;
+    }
+
+    .toggle-arrow {
+      font-size: 9px;
+      color: #666;
+      width: 9px;
+      flex-shrink: 0;
+    }
+
+    .header-emoji {
+      font-size: 15px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .header-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-summary {
+      font-size: 11px;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .category-body {
+      padding: 0 10px 10px;
+      border-top: 1px solid #333;
+    }
+
+    .category-body[hidden] {
+      display: none;
+    }
+
+    /* Meta row: emoji + name */
+    .cat-meta-row {
+      display: flex;
+      gap: 8px;
+      padding-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .cat-meta-row .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cat-meta-row .field-emoji {
+      flex-shrink: 0;
+    }
+
+    .cat-meta-row .field-name {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Time row: usage limit + break time */
+    .cat-time-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cat-time-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-unit {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .input-unit .unit {
+      font-size: 11px;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    /* Shared input styles */
+    .field-label {
+      font-size: 10px;
+      color: #777;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 6px 7px;
+      border-radius: 6px;
+      border: none;
+      background: #1a1a1a;
       color: #fff;
       font-size: 13px;
-      line-height: 1.45;
-      resize: vertical;
       box-sizing: border-box;
     }
 
-    button {
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: 1px solid #ff6b35;
+    }
+
+    .emoji-input {
+      width: 44px;
+      text-align: center;
+      font-size: 15px;
+      padding: 4px 6px;
+    }
+
+    .name-input {
+      width: 100%;
+    }
+
+    .usage-limit-input,
+    .break-time-input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* Sites textarea */
+    .domains-label {
+      display: block;
+      font-size: 10px;
+      color: #777;
+      margin-bottom: 4px;
+    }
+
+    .domains-textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 6px 7px;
+      border-radius: 6px;
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.6;
+      resize: vertical;
+      box-sizing: border-box;
+      font-family: monospace;
+    }
+
+    .domains-textarea:focus {
+      outline: 1px solid #ff6b35;
+    }
+
+    .hint {
+      margin: 4px 0 8px;
+      font-size: 10px;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* Quick-add banner */
+    #quickAddBanner {
+      background: #1b261b;
+      border: 1px solid #2d422d;
+      border-radius: 8px;
+      padding: 9px 10px;
+      margin-bottom: 10px;
+    }
+
+    #quickAddLabel {
+      font-size: 11px;
+      color: #7aaa7a;
+      margin: 0 0 7px;
+    }
+
+    #quickAddLabel strong {
+      color: #9dcc9d;
+    }
+
+    .quick-add-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    #quickAddSelect {
+      flex: 1;
+      min-width: 0;
+      padding: 6px 7px;
+      border-radius: 6px;
+      border: none;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    #quickAddBtn {
+      padding: 6px 11px;
+      border-radius: 6px;
+      border: none;
+      background: #3a6b3a;
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #quickAddBtn:hover {
+      background: #4a864a;
+    }
+
+    .remove-btn {
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #383838;
+      background: transparent;
+      color: #666;
+      font-size: 11px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    .remove-btn:hover {
+      background: #2a1010;
+      color: #e05555;
+      border-color: #e05555;
+    }
+
+    /* Add category button */
+    #addCategoryBtn {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px dashed #3a3a3a;
+      background: transparent;
+      color: #666;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    #addCategoryBtn:hover {
+      border-color: #ff6b35;
+      color: #ff6b35;
+    }
+
+    /* Action buttons */
+    #dismissBtn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #3a3a3a;
+      color: #ccc;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 8px;
+      display: none;
+    }
+
+    #dismissBtn:hover {
+      background: #484848;
+    }
+
+    #saveBtn {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
@@ -90,18 +346,8 @@
       cursor: pointer;
     }
 
-    button:hover {
+    #saveBtn:hover {
       background: #e55a25;
-    }
-
-    #dismissBtn {
-      background: #444;
-      margin-bottom: 12px;
-      display: none;
-    }
-
-    #dismissBtn:hover {
-      background: #555;
     }
 
     .saved {
@@ -110,30 +356,6 @@
       color: #aaa;
       margin-top: 8px;
       display: none;
-    }
-
-    .hint {
-      margin: 6px 0 0;
-      font-size: 11px;
-      line-height: 1.4;
-      color: #888;
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      line-height: 1.4;
-      color: #ddd;
-      cursor: pointer;
-    }
-
-    .toggle-row input {
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      accent-color: #ff6b35;
     }
 
     .footer-link {
@@ -156,31 +378,19 @@
   </style>
 </head>
 <body>
-  <h1>Cat Gatekeeper</h1>
+  <h1><span aria-hidden="true">🐈️</span> Cat Gatekeeper</h1>
 
-  <div class="section">
-    <label data-i18n="usageLimitLabel"></label>
-    <input type="number" id="usageLimit" min="1" max="480" value="30">
+  <div id="quickAddBanner" hidden>
+    <p id="quickAddLabel"></p>
+    <div class="quick-add-row">
+      <select id="quickAddSelect"></select>
+      <button id="quickAddBtn"></button>
+    </div>
   </div>
 
-  <div class="section">
-    <label data-i18n="breakTimeLabel"></label>
-    <input type="number" id="breakTime" min="1" max="60" value="5">
-  </div>
+  <div id="categoriesContainer"></div>
 
-  <div class="section">
-    <label class="toggle-row">
-      <input type="checkbox" id="catEnabled">
-      <span data-i18n="catEnabledLabel"></span>
-    </label>
-  </div>
-
-  <div class="section">
-    <label for="customDomains" data-i18n="targetSNSLabel"></label>
-    <textarea id="customDomains" spellcheck="false" placeholder="x.com&#10;youtube.com&#10;example.com"></textarea>
-    <p class="hint" data-i18n="customDomainsHint"></p>
-  </div>
-
+  <button id="addCategoryBtn"></button>
   <button id="dismissBtn" data-i18n="dismissButton"></button>
   <button id="saveBtn" data-i18n="saveButton"></button>
   <div class="saved" id="savedMsg" data-i18n="savedMessage"></div>

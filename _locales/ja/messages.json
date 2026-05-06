@@ -5,18 +5,6 @@
   "appDescription": {
     "message": "サイトを使いすぎると猫が現れて画面をジャック。かわいい強制休憩アプリ。"
   },
-  "usageLimitLabel": {
-    "message": "何分使ったら猫を出す？"
-  },
-  "breakTimeLabel": {
-    "message": "猫が居座る時間（分）"
-  },
-  "targetSNSLabel": {
-    "message": "対象サイト"
-  },
-  "catEnabledLabel": {
-    "message": "猫を表示する"
-  },
   "saveButton": {
     "message": "保存"
   },
@@ -26,10 +14,43 @@
   "dismissButton": {
     "message": "退いてもらう"
   },
+  "addCategoryButton": {
+    "message": "+ カテゴリを追加"
+  },
+  "removeCategoryButton": {
+    "message": "カテゴリを削除"
+  },
+  "emojiLabel": {
+    "message": "絵文字"
+  },
+  "categoryNameLabel": {
+    "message": "名前"
+  },
+  "usageLimitShortLabel": {
+    "message": "猫が出るまで"
+  },
+  "breakTimeShortLabel": {
+    "message": "休憩時間"
+  },
+  "sitesLabel": {
+    "message": "サイト"
+  },
+  "minuteUnit": {
+    "message": "分"
+  },
   "customDomainsHint": {
     "message": "1行に1つ、またはカンマ区切り。URLも使えます。"
   },
   "officialSiteLink": {
     "message": "Official site"
+  },
+  "quickAddLabel": {
+    "message": "$DOMAIN$ は追跡されていません",
+    "placeholders": {
+      "domain": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "quickAddButton": {
+    "message": "+ 追加"
   }
 }
