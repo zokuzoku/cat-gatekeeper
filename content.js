@@ -13,6 +13,7 @@ const preventScroll = (e) => e.preventDefault();
 
 const hostname = location.hostname;
 const USAGE_STORAGE_KEY = 'catGatekeeperUsage';
+const BREAK_STORAGE_KEY = 'catGatekeeperBreak';
 const USAGE_STALE_AFTER_MS = 30 * 60 * 1000;
 const USAGE_SAVE_INTERVAL_SECONDS = 5;
 
@@ -71,6 +72,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     catIsActive = false;
     stopCountdown();
     resetUsageSeconds(dismissedUsageKey);
+    clearBreakUntil(dismissedUsageKey);
     overlay.style.transition = 'opacity 0.5s';
     overlay.style.opacity = '0';
     setTimeout(() => {
@@ -98,30 +100,12 @@ function getUsageStorageKey(usageKey) {
   return `${USAGE_STORAGE_KEY}:${usageKey}`;
 }
 
-function loadUsageSeconds(usageKey, callback) {
-  const storageKey = getUsageStorageKey(usageKey);
-
-  chrome.storage.local.get({ [storageKey]: null }, (result) => {
-    const entry = result[storageKey];
-    const now = Date.now();
-
-    if (!entry || typeof entry !== 'object') {
-      callback(0);
-      return;
-    }
-
-    if (now - Number(entry.updatedAt || 0) > USAGE_STALE_AFTER_MS) {
-      callback(0);
-      return;
-    }
-
-    callback(Math.max(0, Number.parseInt(entry.seconds, 10) || 0));
-  });
+function getBreakStorageKey(usageKey) {
+  return `${BREAK_STORAGE_KEY}:${usageKey}`;
 }
 
 function saveUsageSeconds(usageKey, seconds) {
   if (!usageKey) return;
-
   chrome.storage.local.set({
     [getUsageStorageKey(usageKey)]: {
       seconds: Math.max(0, seconds),
@@ -132,6 +116,16 @@ function saveUsageSeconds(usageKey, seconds) {
 
 function resetUsageSeconds(usageKey) {
   saveUsageSeconds(usageKey, 0);
+}
+
+function saveBreakUntil(usageKey, breakUntil) {
+  if (!usageKey) return;
+  chrome.storage.local.set({ [getBreakStorageKey(usageKey)]: breakUntil });
+}
+
+function clearBreakUntil(usageKey) {
+  if (!usageKey) return;
+  chrome.storage.local.remove(getBreakStorageKey(usageKey));
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -150,16 +144,38 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
 
   if (resetUsage) {
     resetUsageSeconds(usageKey);
+    clearBreakUntil(usageKey);
   }
 
-  loadUsageSeconds(usageKey, (initialSeconds) => {
-    if (
-      runId !== trackerRunId ||
-      usageKey !== currentUsageKey ||
-      catIsActive ||
-      !currentCategory
-    ) {
+  const usageStorageKey = getUsageStorageKey(usageKey);
+  const breakStorageKey = getBreakStorageKey(usageKey);
+
+  chrome.storage.local.get({ [usageStorageKey]: null, [breakStorageKey]: 0 }, (result) => {
+    if (runId !== trackerRunId || usageKey !== currentUsageKey || catIsActive || !currentCategory) {
       return;
+    }
+
+    // If a break is still active (e.g. tab was duplicated during a break), resume it
+    const breakUntil = Number(result[breakStorageKey]) || 0;
+    const remainingMs = breakUntil - Date.now();
+    if (remainingMs > 0) {
+      catIsActive = true;
+      showCat(Math.ceil(remainingMs / 1000), usageKey, () => {
+        if (currentCategory && usageKey === currentUsageKey) {
+          startTracking(currentCategory.usageLimit, currentCategory.breakTime);
+        }
+      });
+      return;
+    }
+
+    if (breakUntil > 0) clearBreakUntil(usageKey); // stale entry, clean up
+
+    // Normal usage tracking
+    const entry = result[usageStorageKey];
+    const now = Date.now();
+    let initialSeconds = 0;
+    if (entry && typeof entry === 'object' && now - Number(entry.updatedAt || 0) <= USAGE_STALE_AFTER_MS) {
+      initialSeconds = Math.max(0, Number.parseInt(entry.seconds, 10) || 0);
     }
 
     trackerRunning = true;
@@ -174,7 +190,6 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
         resetUsageSeconds(usageKey);
         return;
       }
-
       saveUsageSeconds(usageKey, localSeconds);
     };
 
@@ -202,7 +217,8 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
         shouldPersistUsage = false;
         localSeconds = 0;
         resetUsageSeconds(usageKey);
-        showCat(breakTime, usageLimit, () => {
+        saveBreakUntil(usageKey, Date.now() + breakTime * 60 * 1000);
+        showCat(breakTime * 60, usageKey, () => {
           if (currentCategory && usageKey === currentUsageKey) {
             startTracking(currentCategory.usageLimit, currentCategory.breakTime);
           }
@@ -236,7 +252,7 @@ chrome.storage.local.get(
   (settings) => applySettings(settings)
 );
 
-function showCat(breakMinutes, usageLimit, onBreakEnd) {
+function showCat(breakSeconds, usageKey, onBreakEnd) {
   document.getElementById('cat-gatekeeper-overlay')?.remove();
 
   const overlay = document.createElement('div');
@@ -247,7 +263,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   // カウントダウン
   const countdown = document.createElement('div');
   countdown.id = 'cat-gatekeeper-countdown';
-  let seconds = breakMinutes * 60;
+  let seconds = breakSeconds;
 
   let countdownCancelled = false;
   stopCountdown = () => { countdownCancelled = true; };
@@ -262,6 +278,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       setTimeout(updateCountdown, 1000);
     } else {
       catIsActive = false;
+      clearBreakUntil(usageKey);
       overlay.style.transition = 'opacity 1s';
       overlay.style.opacity = '0';
       setTimeout(() => {
