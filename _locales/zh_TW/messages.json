@@ -1,0 +1,56 @@
+{
+  "appName": {
+    "message": "貓咪守門神"
+  },
+  "appDescription": {
+    "message": "在某些網站上花太多時間了？看看小貓休息一下吧~"
+  },
+  "saveButton": {
+    "message": "儲存"
+  },
+  "savedMessage": {
+    "message": "已儲存！"
+  },
+  "dismissButton": {
+    "message": "走開，小貓！"
+  },
+  "addCategoryButton": {
+    "message": "+ 新增分類"
+  },
+  "removeCategoryButton": {
+    "message": "刪除分類"
+  },
+  "emojiLabel": {
+    "message": "表情"
+  },
+  "categoryNameLabel": {
+    "message": "名稱"
+  },
+  "usageLimitShortLabel": {
+    "message": "貓咪出現於"
+  },
+  "breakTimeShortLabel": {
+    "message": "休息時長"
+  },
+  "sitesLabel": {
+    "message": "網站"
+  },
+  "minuteUnit": {
+    "message": "分鐘"
+  },
+  "customDomainsHint": {
+    "message": "每行一個，或用逗號分隔。支援輸入完整 URL。"
+  },
+  "officialSiteLink": {
+    "message": "官方網站"
+  },
+  "quickAddLabel": {
+    "message": "未追蹤 $DOMAIN$",
+    "placeholders": {
+      "domain": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "quickAddButton": {
+    "message": "+ 新增"
+  }
+}
