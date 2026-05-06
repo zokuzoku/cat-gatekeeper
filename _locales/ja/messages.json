@@ -31,5 +31,8 @@
   },
   "officialSiteLink": {
     "message": "Official site"
+  },
+  "targetSitesHelpTitle": {
+    "message": "サイト計測について"
   }
 }

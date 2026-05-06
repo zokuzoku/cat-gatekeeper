@@ -31,5 +31,8 @@
   },
   "officialSiteLink": {
     "message": "Official site"
+  },
+  "targetSitesHelpTitle": {
+    "message": "About site tracking"
   }
 }

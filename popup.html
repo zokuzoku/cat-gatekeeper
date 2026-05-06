@@ -53,6 +53,33 @@
       margin-bottom: 6px;
     }
 
+    .label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .label-row label {
+      margin-bottom: 0;
+    }
+
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      color: #888;
+      font-size: 13px;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .info-link:hover {
+      color: #ff6b35;
+    }
+
     .section input[type="number"] {
       width: 100%;
       padding: 8px;
@@ -97,11 +124,20 @@
     #dismissBtn {
       background: #444;
       margin-bottom: 12px;
-      display: none;
     }
 
     #dismissBtn:hover {
       background: #555;
+    }
+
+    #dismissBtn:disabled {
+      background: #2a2a2a;
+      color: #777;
+      cursor: default;
+    }
+
+    #dismissBtn:disabled:hover {
+      background: #2a2a2a;
     }
 
     .saved {
@@ -176,7 +212,17 @@
   </div>
 
   <div class="section">
-    <label for="customDomains" data-i18n="targetSNSLabel"></label>
+    <div class="label-row">
+      <label for="customDomains" data-i18n="targetSNSLabel"></label>
+      <a
+        class="info-link"
+        href="https://zokuzoku.github.io/cat-gatekeeper/#faq"
+        data-ja-href="https://zokuzoku.github.io/ja/cat-gatekeeper/#faq"
+        target="_blank"
+        rel="noopener"
+        data-i18n-title="targetSitesHelpTitle"
+      >&#9432;</a>
+    </div>
     <textarea id="customDomains" spellcheck="false" placeholder="x.com&#10;youtube.com&#10;example.com"></textarea>
     <p class="hint" data-i18n="customDomainsHint"></p>
   </div>
