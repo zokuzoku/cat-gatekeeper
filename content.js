@@ -16,35 +16,27 @@ const USAGE_STORAGE_KEY = 'catGatekeeperUsage';
 const USAGE_STALE_AFTER_MS = 30 * 60 * 1000;
 const USAGE_SAVE_INTERVAL_SECONDS = 5;
 
-function mergeSettingsWithDefaults(settings) {
-  return shared.normalizeSettings(settings);
-}
-
-function getMatchedDomain(settings) {
-  return shared.normalizeDomainList(settings.customDomains).find((domain) =>
-    shared.hostnameMatchesDomain(hostname, domain)
-  ) || '';
-}
-
-function isSiteEnabled(settings) {
-  return !!getMatchedDomain(settings);
-}
-
 function applySettings(settings, { resetUsage = false } = {}) {
-  const mergedSettings = mergeSettingsWithDefaults(settings);
-  currentUsageLimit = mergedSettings.usageLimit;
-  currentBreakTime = mergedSettings.breakTime;
-  currentCustomDomains = mergedSettings.customDomains;
-  currentUsageKey = getMatchedDomain(mergedSettings);
-  currentSnsEnabled = mergedSettings.catEnabled && !!currentUsageKey;
+  const merged = shared.normalizeSettings(settings);
+  currentCategories = merged.categories;
 
-  if (!currentSnsEnabled) {
+  const newCategory = shared.getCategoryForHostname(hostname, currentCategories);
+
+  if (!newCategory) {
+    currentCategory = null;
+    currentUsageKey = '';
     stopTracker();
     return;
   }
 
+  const matchedDomain = newCategory.domains.find((d) => shared.hostnameMatchesDomain(hostname, d));
+  const newUsageKey = shared.normalizeDomainEntry(matchedDomain || hostname);
+
+  currentCategory = newCategory;
+  currentUsageKey = newUsageKey;
+
   if (!catIsActive) {
-    startTracking(currentUsageLimit, currentBreakTime, { resetUsage });
+    startTracking(newCategory.usageLimit, newCategory.breakTime, { resetUsage });
   }
 }
 
@@ -58,9 +50,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       catIsActive,
       hostname,
       trackerRunning,
-      customDomains: currentCustomDomains,
-      isTracked: currentSnsEnabled,
+      isTracked: !!currentCategory,
       trackedDomain: currentUsageKey,
+      currentCategory,
       hasFocus: document.hasFocus(),
       isHidden: document.hidden,
     });
@@ -86,8 +78,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       document.documentElement.style.overflow = '';
       document.removeEventListener('wheel', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
-      if (currentSnsEnabled && dismissedUsageKey === currentUsageKey) {
-        startTracking(currentUsageLimit, currentBreakTime);
+      if (currentCategory && dismissedUsageKey === currentUsageKey) {
+        startTracking(currentCategory.usageLimit, currentCategory.breakTime);
       }
     }, 500);
   }
@@ -96,10 +88,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 let resetSeconds = () => {};
 let stopTracker = () => {};
 let stopCountdown = () => {};
-let currentUsageLimit = 60;
-let currentBreakTime = 5;
-let currentSnsEnabled = false;
-let currentCustomDomains = [];
+let currentCategories = [];
+let currentCategory = null;
 let currentUsageKey = '';
 let catAssetsPrepared = false;
 let trackerRunId = 0;
@@ -156,8 +146,6 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
   prepareCatAssets();
   stopTracker();
   const runId = ++trackerRunId;
-  currentUsageLimit = usageLimit;
-  currentBreakTime = breakTime;
   const usageKey = currentUsageKey;
 
   if (resetUsage) {
@@ -169,7 +157,7 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
       runId !== trackerRunId ||
       usageKey !== currentUsageKey ||
       catIsActive ||
-      !currentSnsEnabled
+      !currentCategory
     ) {
       return;
     }
@@ -191,7 +179,7 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
     };
 
     const tracker = setInterval(() => {
-      if (usageKey !== currentUsageKey || catIsActive || !currentSnsEnabled) {
+      if (usageKey !== currentUsageKey || catIsActive || !currentCategory) {
         clearInterval(tracker);
         trackerRunning = false;
         return;
@@ -215,8 +203,8 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
         localSeconds = 0;
         resetUsageSeconds(usageKey);
         showCat(breakTime, usageLimit, () => {
-          if (currentSnsEnabled && usageKey === currentUsageKey) {
-            startTracking(currentUsageLimit, currentBreakTime);
+          if (currentCategory && usageKey === currentUsageKey) {
+            startTracking(currentCategory.usageLimit, currentCategory.breakTime);
           }
         });
       }
@@ -243,9 +231,10 @@ function prepareCatAssets() {
   catAssetsPrepared = true;
 }
 
-chrome.storage.local.get(null, (settings) => {
-  applySettings(settings);
-});
+chrome.storage.local.get(
+  { categories: null, customDomains: null, usageLimit: shared.LEGACY_DEFAULTS.usageLimit, breakTime: shared.LEGACY_DEFAULTS.breakTime },
+  (settings) => applySettings(settings)
+);
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
   document.getElementById('cat-gatekeeper-overlay')?.remove();

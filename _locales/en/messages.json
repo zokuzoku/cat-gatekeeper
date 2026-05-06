@@ -5,18 +5,6 @@
   "appDescription": {
     "message": "Spend too long on selected sites? A cat hijacks your screen. The cutest forced-break app."
   },
-  "usageLimitLabel": {
-    "message": "Minutes before the cat appears"
-  },
-  "breakTimeLabel": {
-    "message": "Break time (minutes)"
-  },
-  "targetSNSLabel": {
-    "message": "Target sites"
-  },
-  "catEnabledLabel": {
-    "message": "Show the cat"
-  },
   "saveButton": {
     "message": "Save"
   },
@@ -26,10 +14,43 @@
   "dismissButton": {
     "message": "Shoo, kitty!"
   },
+  "addCategoryButton": {
+    "message": "+ Add Category"
+  },
+  "removeCategoryButton": {
+    "message": "Remove category"
+  },
+  "emojiLabel": {
+    "message": "Emoji"
+  },
+  "categoryNameLabel": {
+    "message": "Name"
+  },
+  "usageLimitShortLabel": {
+    "message": "Cat appears after"
+  },
+  "breakTimeShortLabel": {
+    "message": "Break time"
+  },
+  "sitesLabel": {
+    "message": "Sites"
+  },
+  "minuteUnit": {
+    "message": "min"
+  },
   "customDomainsHint": {
     "message": "One per line, or separated by commas. URLs are OK."
   },
   "officialSiteLink": {
     "message": "Official site"
+  },
+  "quickAddLabel": {
+    "message": "$DOMAIN$ is not being tracked",
+    "placeholders": {
+      "domain": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "quickAddButton": {
+    "message": "+ Add"
   }
 }
