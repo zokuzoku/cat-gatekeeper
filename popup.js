@@ -35,51 +35,21 @@ function getClampedNumberValue(inputId, fallbackValue) {
   return Math.min(Math.max(parsedValue, minValue), maxValue);
 }
 
-function queryActiveTab(callback) {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tabId = tabs[0]?.id;
-    if (!tabId) return;
-    callback(tabId);
-  });
-}
-
-function requestCatStatus(tabId, attempt = 0) {
-  chrome.tabs.sendMessage(tabId, { type: 'GET_CAT_STATUS' }, (res) => {
-    void chrome.runtime.lastError;
-
-    if (res?.catIsActive) {
-      dismissBtn.disabled = false;
-      return;
-    }
-
-    if (res === undefined && attempt < 3) {
-      setTimeout(() => requestCatStatus(tabId, attempt + 1), 250);
-    }
-  });
-}
-
-function dismissCat(tabId, attempt = 0) {
-  chrome.tabs.sendMessage(tabId, { type: 'DISMISS_CAT' }, () => {
-    if (chrome.runtime.lastError && attempt < 2) {
-      setTimeout(() => dismissCat(tabId, attempt + 1), 200);
-      return;
-    }
-
-    void chrome.runtime.lastError;
-  });
-}
-
 // 猫が出てるときだけ閉じるボタンを表示
 const dismissBtn = document.getElementById('dismissBtn');
-dismissBtn.disabled = true;
-queryActiveTab((tabId) => requestCatStatus(tabId));
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_CAT_STATUS' }, (res) => {
+    void chrome.runtime.lastError;
+    if (res?.catIsActive) dismissBtn.style.display = 'block';
+  });
+});
 
 dismissBtn.addEventListener('click', () => {
-  if (dismissBtn.disabled) return;
-
-  dismissBtn.disabled = true;
-  queryActiveTab((tabId) => {
-    dismissCat(tabId);
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, { type: 'DISMISS_CAT' }, () => {
+      void chrome.runtime.lastError;
+    });
+    dismissBtn.style.display = 'none';
   });
 });
 
@@ -115,8 +85,8 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 2000);
 
-    queryActiveTab((tabId) => {
-      chrome.tabs.sendMessage(tabId, { type: 'UPDATE_SETTINGS', settings }, () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'UPDATE_SETTINGS', settings }, () => {
         void chrome.runtime.lastError;
       });
     });
