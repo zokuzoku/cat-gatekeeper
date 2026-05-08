@@ -174,6 +174,18 @@ function startTracking(usageLimit, breakTime, { resetUsage = false } = {}) {
       return;
     }
 
+    // すでに制限時間を超えている場合は即座に猫を出す
+    if (initialSeconds >= usageLimit * 60) {
+      catIsActive = true;
+      resetUsageSeconds(usageKey);
+      showCat(breakTime, usageLimit, () => {
+        if (currentSnsEnabled && usageKey === currentUsageKey) {
+          startTracking(currentUsageLimit, currentBreakTime);
+        }
+      });
+      return;
+    }
+
     trackerRunning = true;
     let localSeconds = resetUsage ? 0 : initialSeconds;
     let secondsSinceSave = 0;
