@@ -9,6 +9,16 @@ Official website: https://zokuzoku.github.io/cat-gatekeeper/
 
 Questions, bug reports, and feature requests are welcome via GitHub Issues.
 
+## Contributions
+
+Thank you for the interest and support!
+
+At the moment, Cat Gatekeeper Extension is developed and maintained by a single developer, and I don’t currently have enough time to properly review and test external implementation PRs.
+
+Because of this, I’m currently not accepting feature implementation pull requests.
+
+Bug reports, feedback, and feature suggestions through GitHub issues are still very welcome and appreciated.
+
 ## License
 
 The source code is licensed under the MIT License. See [LICENSE](LICENSE).
