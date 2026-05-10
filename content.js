@@ -1,6 +1,6 @@
 const shared = globalThis.CatGatekeeperShared;
 
-// 事前読み込み
+// Pre-load assets
 const preloadVideo = document.createElement('video');
 preloadVideo.preload = 'auto';
 preloadVideo.muted = true;
@@ -51,7 +51,7 @@ function applySettings(settings, { resetUsage = false } = {}) {
 let catIsActive = false;
 let trackerRunning = false;
 
-// ポップアップからのメッセージを受け取る
+// Handle messages from the popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
     sendResponse({
@@ -255,7 +255,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   overlay.style.setProperty('opacity', '1', 'important');
   overlay.style.transition = '';
 
-  // カウントダウン
+  // Countdown timer
   const countdown = document.createElement('div');
   countdown.id = 'cat-gatekeeper-countdown';
   let seconds = breakMinutes * 60;
@@ -286,7 +286,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   }
   updateCountdown();
 
-  // neko1
+  // neko1 video
   const video = document.createElement('video');
   video.src = chrome.runtime.getURL('assets/neko1.webm');
   video.autoplay = true;
@@ -294,7 +294,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   video.playsInline = true;
   video.style.opacity = '1';
 
-  // neko2（先読み・非表示）
+  // neko2 video (preload and hidden)
   const videoSleep = document.createElement('video');
   videoSleep.src = chrome.runtime.getURL('assets/neko2.webm');
   videoSleep.muted = true;
@@ -311,12 +311,12 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   document.addEventListener('wheel', preventScroll, { passive: false });
   document.addEventListener('touchmove', preventScroll, { passive: false });
 
-  // ページ上の動画を一時停止（猫の動画は除く）
+  // Pause page videos (excluding the cat videos)
   document.querySelectorAll('video').forEach(v => {
     if (v !== video && v !== videoSleep) v.pause();
   });
 
-  // neko1が終わったらneko2に切り替え
+  // Switch to neko2 when neko1 ends
   video.addEventListener('ended', () => {
     video.style.display = 'none';
     videoSleep.style.display = 'block';
@@ -324,3 +324,4 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
     videoSleep.play();
   });
 }
+
