@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pausa</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <main id="overlay">
+    <div id="countdown">0:00</div>
+    <video id="introVideo" autoplay muted playsinline></video>
+    <video id="loopVideo" muted playsinline loop hidden></video>
+    <div id="missingVideo" hidden>
+      <strong>Pausa activa</strong>
+      <span>Respira, estira y vuelve en unos minutos.</span>
+    </div>
+  </main>
+
+  <script src="overlay.js"></script>
+</body>
+</html>
