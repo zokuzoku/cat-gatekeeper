@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pausa Activa Gato</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="title-bar">
+      <div>
+        <p class="eyebrow">Pausas programadas</p>
+        <h1>Pausa Activa Gato</h1>
+      </div>
+      <label class="switch" title="Activar o pausar las pausas programadas">
+        <input id="enabled" type="checkbox">
+        <span></span>
+      </label>
+    </header>
+
+    <section class="panel">
+      <label for="breakDurationMinutes">Duracion de la pausa</label>
+      <div class="number-row">
+        <input id="breakDurationMinutes" type="number" min="1" max="120" step="1">
+        <span>minutos</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label for="scheduleTimes">Horas de activacion</label>
+      <textarea id="scheduleTimes" spellcheck="false" placeholder="09:00&#10;11:00&#10;15:00"></textarea>
+      <p class="hint">Escribe una hora por linea en formato 24 horas.</p>
+    </section>
+
+    <section class="panel compact">
+      <label class="check-row">
+        <input id="autoLaunch" type="checkbox">
+        <span>Iniciar con Windows</span>
+      </label>
+      <label class="check-row">
+        <input id="launchMinimized" type="checkbox">
+        <span>Iniciar en segundo plano</span>
+      </label>
+    </section>
+
+    <footer class="actions">
+      <button id="startNow" class="secondary" type="button">Probar pausa</button>
+      <button id="save" type="button">Guardar</button>
+    </footer>
+
+    <p id="status" class="status" role="status"></p>
+  </main>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
