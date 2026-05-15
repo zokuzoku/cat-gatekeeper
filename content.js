@@ -1,6 +1,6 @@
 const shared = globalThis.CatGatekeeperShared;
 
-// 事前読み込み
+// Pre-load assets
 const preloadVideo = document.createElement('video');
 preloadVideo.preload = 'auto';
 preloadVideo.muted = true;
@@ -64,6 +64,8 @@ function getShadowRoot() {
     host.style.width = '0';
     host.style.height = '0';
     host.style.zIndex = '2147483647';
+    // Ensure the host doesn't block clicks when empty
+    host.style.pointerEvents = 'none';
     document.documentElement.appendChild(host);
   }
   if (!host.shadowRoot) {
@@ -72,7 +74,7 @@ function getShadowRoot() {
   return host.shadowRoot;
 }
 
-// ポップアップからのメッセージを受け取る
+// Handle messages from the popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
     sendResponse({
@@ -107,8 +109,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       overlay.remove();
       const host = document.getElementById('cat-gk-host');
       if (host) {
-        host.style.width = '0';
-        host.style.height = '0';
+        host.remove();
       }
       document.documentElement.style.overflow = '';
       document.removeEventListener('wheel', preventScroll);
@@ -119,6 +120,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     }, 500);
   }
 });
+
 
 
 let resetSeconds = () => {};
@@ -278,8 +280,16 @@ chrome.storage.local.get(null, (settings) => {
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
   const shadow = getShadowRoot();
   const host = document.getElementById('cat-gk-host');
+
+  // Prevent duplicate overlays
+  if (shadow.getElementById('cat-gatekeeper-overlay')) {
+    return;
+  }
+
+  // Activate host
   host.style.width = '100vw';
   host.style.height = '100vh';
+  host.style.pointerEvents = 'auto';
 
   // Inject CSS into Shadow DOM
   if (!shadow.querySelector('link')) {
@@ -294,7 +304,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   overlay.style.setProperty('opacity', '1', 'important');
   overlay.style.transition = '';
 
-  // カウントダウン
+  // Countdown timer
   const countdown = document.createElement('div');
   countdown.id = 'cat-gatekeeper-countdown';
   let seconds = breakMinutes * 60;
@@ -316,8 +326,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       overlay.style.opacity = '0';
       setTimeout(() => {
         overlay.remove();
-        host.style.width = '0';
-        host.style.height = '0';
+        if (host) host.remove();
         document.documentElement.style.overflow = '';
         document.removeEventListener('wheel', preventScroll);
         document.removeEventListener('touchmove', preventScroll);
@@ -327,7 +336,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   }
   updateCountdown();
 
-  // neko1
+  // neko1 video
   const video = document.createElement('video');
   video.src = chrome.runtime.getURL('assets/neko1.webm');
   video.autoplay = true;
@@ -335,7 +344,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   video.playsInline = true;
   video.style.opacity = '1';
 
-  // neko2（先読み・非表示）
+  // neko2 video (preload and hidden)
   const videoSleep = document.createElement('video');
   videoSleep.src = chrome.runtime.getURL('assets/neko2.webm');
   videoSleep.muted = true;
@@ -352,12 +361,12 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   document.addEventListener('wheel', preventScroll, { passive: false });
   document.addEventListener('touchmove', preventScroll, { passive: false });
 
-  // ページ上の動画を一時停止（猫の動画は除く）
+  // Pause page videos (excluding the cat videos)
   document.querySelectorAll('video').forEach(v => {
     if (v !== video && v !== videoSleep && !shadow.contains(v)) v.pause();
   });
 
-  // neko1が終わったらneko2に切り替え
+  // Switch to neko2 when neko1 ends
   video.addEventListener('ended', () => {
     video.style.display = 'none';
     videoSleep.style.display = 'block';
@@ -365,4 +374,5 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
     videoSleep.play();
   });
 }
+
 
