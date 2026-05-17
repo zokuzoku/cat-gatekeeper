@@ -13,6 +13,7 @@ const preventScroll = (e) => e.preventDefault();
 
 const hostname = location.hostname;
 const USAGE_STORAGE_KEY = 'catGatekeeperUsage';
+const BREAK_STORAGE_KEY = 'catGatekeeperBreak';
 const USAGE_STALE_AFTER_MS = 30 * 60 * 1000;
 const USAGE_SAVE_INTERVAL_SECONDS = 5;
 
@@ -42,6 +43,8 @@ function applySettings(settings, { resetUsage = false } = {}) {
     stopTracker();
     return;
   }
+
+  tryRestoreActiveBreak();
 
   if (!catIsActive) {
     startTracking(currentUsageLimit, currentBreakTime, { resetUsage });
@@ -78,6 +81,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     const dismissedUsageKey = currentUsageKey;
     catIsActive = false;
     stopCountdown();
+    clearBreakEndAtMs(dismissedUsageKey);
     resetUsageSeconds(dismissedUsageKey);
     overlay.style.transition = 'opacity 0.5s';
     overlay.style.opacity = '0';
@@ -106,6 +110,30 @@ let trackerRunId = 0;
 
 function getUsageStorageKey(usageKey) {
   return `${USAGE_STORAGE_KEY}:${usageKey}`;
+}
+
+function getBreakStorageKey(usageKey) {
+  return `${BREAK_STORAGE_KEY}:${usageKey}`;
+}
+
+function loadBreakEndAtMs(usageKey, callback) {
+  const storageKey = getBreakStorageKey(usageKey);
+
+  chrome.storage.local.get({ [storageKey]: null }, (result) => {
+    const value = result[storageKey];
+    const endAt = Number.parseInt(value, 10);
+    callback(Number.isFinite(endAt) && endAt > 0 ? endAt : null);
+  });
+}
+
+function saveBreakEndAtMs(usageKey, endAtMs) {
+  if (!usageKey) return;
+  chrome.storage.local.set({ [getBreakStorageKey(usageKey)]: Math.max(0, Number(endAtMs) || 0) });
+}
+
+function clearBreakEndAtMs(usageKey) {
+  if (!usageKey) return;
+  chrome.storage.local.remove(getBreakStorageKey(usageKey));
 }
 
 function loadUsageSeconds(usageKey, callback) {
@@ -247,7 +275,7 @@ chrome.storage.local.get(null, (settings) => {
   applySettings(settings);
 });
 
-function showCat(breakMinutes, usageLimit, onBreakEnd) {
+function showCat(breakMinutes, usageLimit, onBreakEnd, { breakEndAtMs = null } = {}) {
   document.getElementById('cat-gatekeeper-overlay')?.remove();
 
   const overlay = document.createElement('div');
@@ -258,21 +286,24 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   // Countdown timer
   const countdown = document.createElement('div');
   countdown.id = 'cat-gatekeeper-countdown';
-  let seconds = breakMinutes * 60;
+  const usageKeyAtStart = currentUsageKey;
+  const endAtMs = breakEndAtMs || (Date.now() + breakMinutes * 60 * 1000);
+  saveBreakEndAtMs(usageKeyAtStart, endAtMs);
 
   let countdownCancelled = false;
   stopCountdown = () => { countdownCancelled = true; };
 
   function updateCountdown() {
     if (countdownCancelled) return;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
+    const remainingSeconds = Math.max(0, Math.ceil((endAtMs - Date.now()) / 1000));
+    const m = Math.floor(remainingSeconds / 60);
+    const s = remainingSeconds % 60;
     countdown.textContent = `${m}:${String(s).padStart(2, '0')}`;
-    if (seconds > 0) {
-      seconds--;
+    if (remainingSeconds > 0) {
       setTimeout(updateCountdown, 1000);
     } else {
       catIsActive = false;
+      clearBreakEndAtMs(usageKeyAtStart);
       overlay.style.transition = 'opacity 1s';
       overlay.style.opacity = '0';
       setTimeout(() => {
@@ -322,6 +353,31 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
     videoSleep.style.display = 'block';
     videoSleep.classList.add('sleeping');
     videoSleep.play();
+  });
+}
+
+function tryRestoreActiveBreak() {
+  const usageKey = currentUsageKey;
+  if (!usageKey) return;
+
+  loadBreakEndAtMs(usageKey, (endAtMs) => {
+    if (!endAtMs) return;
+    if (usageKey !== currentUsageKey) return;
+    if (!currentSnsEnabled || catIsActive) return;
+
+    const remainingMs = endAtMs - Date.now();
+    if (remainingMs <= 0) {
+      clearBreakEndAtMs(usageKey);
+      return;
+    }
+
+    catIsActive = true;
+    stopTracker();
+    showCat(currentBreakTime, currentUsageLimit, () => {
+      if (currentSnsEnabled && usageKey === currentUsageKey) {
+        startTracking(currentUsageLimit, currentBreakTime);
+      }
+    }, { breakEndAtMs: endAtMs });
   });
 }
 
