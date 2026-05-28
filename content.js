@@ -51,6 +51,29 @@ function applySettings(settings, { resetUsage = false } = {}) {
 let catIsActive = false;
 let trackerRunning = false;
 
+// Shadow DOM helper
+function getShadowRoot() {
+  const hostId = 'cat-gk-host';
+  let host = document.getElementById(hostId);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = hostId;
+    host.style.position = 'fixed';
+    host.style.top = '0';
+    host.style.left = '0';
+    host.style.width = '0';
+    host.style.height = '0';
+    host.style.zIndex = '2147483647';
+    // Ensure the host doesn't block clicks when empty
+    host.style.pointerEvents = 'none';
+    document.documentElement.appendChild(host);
+  }
+  if (!host.shadowRoot) {
+    host.attachShadow({ mode: 'open' });
+  }
+  return host.shadowRoot;
+}
+
 // Handle messages from the popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_CAT_STATUS') {
@@ -73,7 +96,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === 'DISMISS_CAT') {
-    const overlay = document.getElementById('cat-gatekeeper-overlay');
+    const shadow = getShadowRoot();
+    const overlay = shadow.getElementById('cat-gatekeeper-overlay');
     if (!overlay) return;
     const dismissedUsageKey = currentUsageKey;
     catIsActive = false;
@@ -83,6 +107,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     overlay.style.opacity = '0';
     setTimeout(() => {
       overlay.remove();
+      const host = document.getElementById('cat-gk-host');
+      if (host) {
+        host.remove();
+      }
       document.documentElement.style.overflow = '';
       document.removeEventListener('wheel', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
@@ -92,6 +120,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     }, 500);
   }
 });
+
+
 
 let resetSeconds = () => {};
 let stopTracker = () => {};
@@ -248,7 +278,26 @@ chrome.storage.local.get(null, (settings) => {
 });
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {
-  document.getElementById('cat-gatekeeper-overlay')?.remove();
+  const shadow = getShadowRoot();
+  const host = document.getElementById('cat-gk-host');
+
+  // Prevent duplicate overlays
+  if (shadow.getElementById('cat-gatekeeper-overlay')) {
+    return;
+  }
+
+  // Activate host
+  host.style.width = '100vw';
+  host.style.height = '100vh';
+  host.style.pointerEvents = 'auto';
+
+  // Inject CSS into Shadow DOM
+  if (!shadow.querySelector('link')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL('content.css');
+    shadow.appendChild(link);
+  }
 
   const overlay = document.createElement('div');
   overlay.id = 'cat-gatekeeper-overlay';
@@ -277,6 +326,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       overlay.style.opacity = '0';
       setTimeout(() => {
         overlay.remove();
+        if (host) host.remove();
         document.documentElement.style.overflow = '';
         document.removeEventListener('wheel', preventScroll);
         document.removeEventListener('touchmove', preventScroll);
@@ -306,14 +356,14 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   overlay.appendChild(countdown);
   overlay.appendChild(video);
   overlay.appendChild(videoSleep);
-  document.body.appendChild(overlay);
+  shadow.appendChild(overlay);
   document.documentElement.style.overflow = 'hidden';
   document.addEventListener('wheel', preventScroll, { passive: false });
   document.addEventListener('touchmove', preventScroll, { passive: false });
 
   // Pause page videos (excluding the cat videos)
   document.querySelectorAll('video').forEach(v => {
-    if (v !== video && v !== videoSleep) v.pause();
+    if (v !== video && v !== videoSleep && !shadow.contains(v)) v.pause();
   });
 
   // Switch to neko2 when neko1 ends
@@ -324,4 +374,5 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
     videoSleep.play();
   });
 }
+
 

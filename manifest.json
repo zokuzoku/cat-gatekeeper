@@ -34,17 +34,17 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js": ["shared.js", "content.js"],
-      "css": ["content.css"]
+      "js": ["shared.js", "content.js"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*"],
+      "resources": ["assets/*", "content.css"],
       "matches": [
         "http://*/*",
         "https://*/*"
       ]
     }
   ]
+
 }
