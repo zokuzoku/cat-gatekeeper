@@ -3,7 +3,7 @@
     "message": "Cat Gatekeeper"
   },
   "appDescription": {
-    "message": "Spend too long on selected sites? A cat hijacks your screen. The cutest forced-break app."
+    "message": "Spend too long on social media? A cat hijacks your screen. The cutest forced-break app."
   },
   "usageLimitLabel": {
     "message": "Minutes before the cat appears"
@@ -32,7 +32,10 @@
   "officialSiteLink": {
     "message": "Official site"
   },
+  "desktopReleaseLink": {
+    "message": "🎉 Desktop app is here!"
+  },
   "targetSitesHelpTitle": {
-    "message": "About site tracking"
+    "message": "On sites with frequent page changes or reloads, tracking may reset more easily. We recommend using this on social media, video sites, or other services where you stay on the same site for a while."
   }
 }

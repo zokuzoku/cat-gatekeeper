@@ -19,7 +19,7 @@
 
   const DEFAULT_SETTINGS = Object.freeze({
     catEnabled: true,
-    usageLimit: 30,
+    usageLimit: 10,
     breakTime: 5,
     customDomains: DEFAULT_DOMAINS,
   });

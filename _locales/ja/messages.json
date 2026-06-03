@@ -3,7 +3,7 @@
     "message": "Cat Gatekeeper"
   },
   "appDescription": {
-    "message": "サイトを使いすぎると猫が現れて画面をジャック。かわいい強制休憩アプリ。"
+    "message": "SNSを使いすぎると猫が現れて画面をジャック。かわいい強制休憩アプリ。"
   },
   "usageLimitLabel": {
     "message": "何分使ったら猫を出す？"
@@ -32,7 +32,10 @@
   "officialSiteLink": {
     "message": "Official site"
   },
+  "desktopReleaseLink": {
+    "message": "🎉デスクトップ版ができました！"
+  },
   "targetSitesHelpTitle": {
-    "message": "サイト計測について"
+    "message": "ページ移動や読み込みが多いサイトでは計測がリセットされやすいため、SNSや動画サイトなど、同じサイト内で長く見続けるサービスでの利用をおすすめします。"
   }
 }

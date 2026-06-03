@@ -1,4 +1,4 @@
-// Apply translations
+// 翻訳を適用
 document.querySelectorAll('[data-i18n]').forEach(el => {
   el.textContent = chrome.i18n.getMessage(el.dataset.i18n);
 });
@@ -35,7 +35,7 @@ function getClampedNumberValue(inputId, fallbackValue) {
   return Math.min(Math.max(parsedValue, minValue), maxValue);
 }
 
-// Show dismiss button only when the cat is active
+// 猫が出てるときだけ閉じるボタンを表示
 const dismissBtn = document.getElementById('dismissBtn');
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_CAT_STATUS' }, (res) => {
@@ -57,7 +57,7 @@ const defaults = {
   ...shared.DEFAULT_SETTINGS,
 };
 
-// Load settings
+// 設定を読み込む
 chrome.storage.local.get(null, (settings) => {
   const mergedSettings = mergeSettingsWithDefaults(settings);
 
@@ -67,7 +67,7 @@ chrome.storage.local.get(null, (settings) => {
   document.getElementById('catEnabled').checked = mergedSettings.catEnabled;
 });
 
-// Save settings
+// 設定を保存する
 document.getElementById('saveBtn').addEventListener('click', () => {
   const settings = {
     catEnabled: document.getElementById('catEnabled').checked,
@@ -92,4 +92,3 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     });
   });
 });
-

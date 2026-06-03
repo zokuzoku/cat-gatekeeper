@@ -13,6 +13,7 @@
 }
 
 #cat-gatekeeper-overlay video {
+  position: absolute;
   height: 100vh;
   width: auto;
   animation: slide-in 3s forwards;
@@ -30,15 +31,15 @@
 
 #cat-gatekeeper-countdown {
   position: absolute;
-  top: 20vh;
-  left: 35%;
+  top: 0;
+  left: 23%;
   transform: translateX(-50%);
-  font-size: 160px;
+  font-size: 140px;
   font-weight: bold;
   color: white;
   font-family: sans-serif;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 20px;
-  padding: 60px 60px;
+  padding: 32px 42px;
   line-height: 1;
 }

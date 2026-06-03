@@ -54,6 +54,7 @@
     }
 
     .label-row {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -65,6 +66,7 @@
     }
 
     .info-link {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -78,6 +80,34 @@
 
     .info-link:hover {
       color: #ff6b35;
+    }
+
+    .info-tooltip {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 6px);
+      z-index: 10;
+      width: 300px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #333;
+      color: #f5f5f5;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.5;
+      text-align: left;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    .info-link:hover + .info-tooltip,
+    .info-link:focus-visible + .info-tooltip {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .section input[type="number"] {
@@ -163,10 +193,15 @@
       accent-color: #ff6b35;
     }
 
-    .footer-link {
-      display: block;
+    .footer-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
       margin-top: 12px;
-      text-align: center;
+    }
+
+    .footer-link {
       font-size: 13px;
       font-weight: 500;
       font-family: Arial, sans-serif;
@@ -180,6 +215,12 @@
       color: #fff;
       text-decoration: underline;
     }
+
+    .footer-link--release {
+      color: #fff;
+      letter-spacing: 0;
+      word-spacing: normal;
+    }
   </style>
 </head>
 <body>
@@ -187,7 +228,7 @@
 
   <div class="section">
     <label data-i18n="usageLimitLabel"></label>
-    <input type="number" id="usageLimit" min="1" max="480" value="30">
+    <input type="number" id="usageLimit" min="1" max="480" value="10">
   </div>
 
   <div class="section">
@@ -211,8 +252,8 @@
         data-ja-href="https://zokuzoku.github.io/ja/cat-gatekeeper/#faq"
         target="_blank"
         rel="noopener"
-        data-i18n-title="targetSitesHelpTitle"
       >&#9432;</a>
+      <span class="info-tooltip" data-i18n="targetSitesHelpTitle"></span>
     </div>
     <textarea id="customDomains" spellcheck="false" placeholder="x.com&#10;youtube.com&#10;example.com"></textarea>
     <p class="hint" data-i18n="customDomainsHint"></p>
@@ -221,7 +262,17 @@
   <button id="dismissBtn" data-i18n="dismissButton"></button>
   <button id="saveBtn" data-i18n="saveButton"></button>
   <div class="saved" id="savedMsg" data-i18n="savedMessage"></div>
-  <a class="footer-link" href="https://zokuzoku.github.io/cat-gatekeeper/" target="_blank" rel="noopener" data-i18n="officialSiteLink"></a>
+  <div class="footer-links">
+    <a
+      class="footer-link footer-link--release"
+      href="https://zokuzoku.github.io/cat-gatekeeper/desktop/"
+      data-ja-href="https://zokuzoku.github.io/ja/cat-gatekeeper/desktop/"
+      target="_blank"
+      rel="noopener"
+      data-i18n="desktopReleaseLink"
+    ></a>
+    <a class="footer-link" href="https://zokuzoku.github.io/cat-gatekeeper/" target="_blank" rel="noopener" data-i18n="officialSiteLink"></a>
+  </div>
 
   <script src="shared.js"></script>
   <script src="popup.js"></script>
