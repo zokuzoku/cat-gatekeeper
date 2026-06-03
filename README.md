@@ -5,6 +5,15 @@ spend too long on selected websites.
 
 Official website: https://zokuzoku.github.io/cat-gatekeeper/
 
+## Asset License Notice
+
+The source code is open source, but the cat videos, icons, logos, images, and
+other visual or brand assets are not free to use.
+
+These assets are not covered by the MIT License. All rights are reserved. See
+[ASSETS_LICENSE.md](ASSETS_LICENSE.md) before using anything from the
+`assets/` directory or Cat Gatekeeper visual branding.
+
 ## Contact
 
 Questions, bug reports, and feature requests are welcome via GitHub Issues.
@@ -22,7 +31,3 @@ Bug reports, feedback, and feature suggestions through GitHub issues are still v
 ## License
 
 The source code is licensed under the MIT License. See [LICENSE](LICENSE).
-
-Cat videos, icons, logos, images, and other visual or brand assets are not
-covered by the MIT License. All rights are reserved. See
-[ASSETS_LICENSE.md](ASSETS_LICENSE.md).
