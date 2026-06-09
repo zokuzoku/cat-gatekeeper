@@ -21,6 +21,13 @@ const hostname = location.hostname;
 const USAGE_STORAGE_KEY = 'catGatekeeperUsage';
 const USAGE_STALE_AFTER_MS = 30 * 60 * 1000;
 const USAGE_SAVE_INTERVAL_SECONDS = 5;
+const SETTINGS_STORAGE_KEYS = new Set([
+  'catEnabled',
+  'usageLimit',
+  'breakTime',
+  'customDomains',
+  'sns',
+]);
 
 function mergeSettingsWithDefaults(settings) {
   return shared.normalizeSettings(settings);
@@ -115,11 +122,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       isHidden: document.hidden,
     });
     return;
-  }
-
-  if (message.type === 'UPDATE_SETTINGS') {
-    stopTracker();
-    applySettings(message.settings, { resetUsage: true });
   }
 
   if (message.type === 'DISMISS_CAT') {
@@ -315,6 +317,20 @@ function prepareVideo(src) {
 
 chrome.storage.local.get(null, (settings) => {
   applySettings(settings);
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') return;
+
+  const settingsChanged = Object.keys(changes).some((key) =>
+    SETTINGS_STORAGE_KEYS.has(key)
+  );
+
+  if (!settingsChanged) return;
+
+  chrome.storage.local.get(null, (settings) => {
+    applySettings(settings, { resetUsage: true });
+  });
 });
 
 function showCat(breakMinutes, usageLimit, onBreakEnd) {

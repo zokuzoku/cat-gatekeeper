@@ -9,7 +9,6 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const DEFAULT_DOMAINS = Object.freeze([
     'x.com',
-    'twitter.com',
     'youtube.com',
     'facebook.com',
     'reddit.com',
@@ -25,7 +24,7 @@
   });
 
   const LEGACY_SNS_DOMAINS = Object.freeze({
-    x: ['x.com', 'twitter.com'],
+    x: 'x.com',
     youtube: 'youtube.com',
     facebook: 'facebook.com',
     reddit: 'reddit.com',
@@ -67,6 +66,10 @@
     value = value.replace(/^[*.]+/, '');
     value = value.replace(/^www\./, '');
     value = value.replace(/\.+$/, '');
+
+    if (value === 'twitter.com') {
+      value = 'x.com';
+    }
 
     if (!value || !value.includes('.') || !/^[a-z0-9.-]+$/.test(value)) {
       return '';
