@@ -5,6 +5,15 @@ spend too long on selected websites.
 
 Official website: https://zokuzoku.github.io/cat-gatekeeper/
 
+> This repository contains the source code of an earlier version of Cat Gatekeeper
+> released under the MIT License. It is no longer the current source repository.
+>
+> The current source code is available at:
+> https://github.com/zokuzoku/cat-gatekeeper-source
+>
+> Questions, bug reports, and feature requests are still accepted in this
+> repository's Issues.
+
 ## Asset License Notice
 
 The source code is open source, but the cat videos, icons, logos, images, and
