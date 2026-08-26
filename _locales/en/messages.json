@@ -26,6 +26,12 @@
   "dismissButton": {
     "message": "Shoo, kitty!"
   },
+  "enableSoundButton": {
+    "message": "Turn purring sound on"
+  },
+  "disableSoundButton": {
+    "message": "Turn purring sound off"
+  },
   "customDomainsHint": {
     "message": "One per line, or separated by commas. URLs are OK."
   },
