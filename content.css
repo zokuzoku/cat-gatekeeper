@@ -43,3 +43,24 @@
   padding: 32px 42px;
   line-height: 1;
 }
+
+#cat-gatekeeper-sound {
+  position: absolute;
+  bottom: 3vh;
+  left: calc(50% + 100px);
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font: 20px sans-serif;
+  cursor: pointer;
+}
+
+#cat-gatekeeper-sound:hover,
+#cat-gatekeeper-sound:focus-visible {
+  background: rgba(30, 30, 30, 0.9);
+}

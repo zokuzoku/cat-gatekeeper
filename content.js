@@ -4,6 +4,7 @@ const CAT_VIDEO_SETS = [
   {
     entry: 'assets/neko1.webm',
     sleep: 'assets/neko2.webm',
+    sound: 'assets/neko-purr.wav',
     countdown: {
       top: '20vh',
       left: '35%',
@@ -137,6 +138,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     const dismissedUsageKey = currentUsageKey;
     catIsActive = false;
     stopCountdown();
+    overlay.querySelector('audio')?.pause();
     resetUsageSeconds(dismissedUsageKey);
     overlay.style.transition = 'opacity 0.5s';
     overlay.style.opacity = '0';
@@ -315,6 +317,15 @@ function prepareVideo(src) {
   return video;
 }
 
+function prepareSound(src) {
+  const audio = document.createElement('audio');
+  audio.src = chrome.runtime.getURL(src);
+  audio.preload = 'auto';
+  audio.loop = true;
+  audio.load();
+  return audio;
+}
+
 chrome.storage.local.get(null, (settings) => {
   applySettings(settings);
 });
@@ -377,6 +388,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       setTimeout(updateCountdown, 1000);
     } else {
       catIsActive = false;
+      overlay.querySelector('audio')?.pause();
       overlay.style.transition = 'opacity 1s';
       overlay.style.opacity = '0';
       setTimeout(() => {
@@ -404,9 +416,40 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
   videoSleep.style.opacity = '1';
   videoSleep.style.zIndex = '1';
 
+  const sound = prepareSound(catSet.sound);
+
+  const soundButton = document.createElement('button');
+  soundButton.type = 'button';
+  soundButton.id = 'cat-gatekeeper-sound';
+
+  function updateSoundButton() {
+    const isPlaying = !sound.paused;
+    soundButton.textContent = isPlaying ? '🔊' : '🔇';
+    soundButton.setAttribute('aria-pressed', String(isPlaying));
+    const label = chrome.i18n.getMessage(
+      isPlaying ? 'disableSoundButton' : 'enableSoundButton'
+    );
+    soundButton.setAttribute('aria-label', label);
+    soundButton.title = label;
+  }
+
+  sound.addEventListener('pause', updateSoundButton);
+  soundButton.addEventListener('pointerdown', (event) => event.stopPropagation());
+  soundButton.addEventListener('pointerup', (event) => event.stopPropagation());
+  soundButton.addEventListener('click', () => {
+    if (sound.paused) {
+      sound.play().then(updateSoundButton).catch(updateSoundButton);
+    } else {
+      sound.pause();
+    }
+  });
+  updateSoundButton();
+
   overlay.appendChild(countdown);
   overlay.appendChild(video);
   overlay.appendChild(videoSleep);
+  overlay.appendChild(sound);
+  overlay.appendChild(soundButton);
 
   // neko1が終わったらneko2に切り替え
   video.addEventListener('ended', () => {
@@ -428,6 +471,7 @@ function showCat(breakMinutes, usageLimit, onBreakEnd) {
       !shadow.getElementById(OVERLAY_ID)
     ) {
       shadow.appendChild(overlay);
+      sound.play().then(updateSoundButton).catch(updateSoundButton);
       document.documentElement.style.overflow = 'hidden';
       document.addEventListener('wheel', preventScroll, { passive: false });
       document.addEventListener('touchmove', preventScroll, { passive: false });

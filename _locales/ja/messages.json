@@ -26,6 +26,12 @@
   "dismissButton": {
     "message": "退いてもらう"
   },
+  "enableSoundButton": {
+    "message": "ゴロゴロ音をオンにする"
+  },
+  "disableSoundButton": {
+    "message": "ゴロゴロ音をオフにする"
+  },
   "customDomainsHint": {
     "message": "1行に1つ、またはカンマ区切り。URLも使えます。"
   },
